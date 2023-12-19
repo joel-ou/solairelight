@@ -1,6 +1,6 @@
 logging:
   level:
-    cn.muskmelon.*: debug
+    cn.solairelight.*: debug
 
 
 #SolairelightConfig example
