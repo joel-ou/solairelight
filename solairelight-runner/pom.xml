@@ -92,7 +92,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>cn.muskmelon.Application</mainClass>
+                    <mainClass>cn.solairelight.Application</mainClass>
                 </configuration>
                 <executions>
                     <execution>

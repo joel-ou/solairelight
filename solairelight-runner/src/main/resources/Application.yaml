@@ -3,8 +3,8 @@ logging:
     cn.muskmelon.*: debug
 
 
-#MuskmelonConfig example
-muskmelon:
+#SolairelightConfig example
+solairelight:
   enable: true
   websocket-path: /path
   secure:
