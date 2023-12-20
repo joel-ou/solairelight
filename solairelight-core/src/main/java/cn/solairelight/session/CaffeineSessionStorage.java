@@ -1,9 +1,9 @@
 package cn.solairelight.session;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;

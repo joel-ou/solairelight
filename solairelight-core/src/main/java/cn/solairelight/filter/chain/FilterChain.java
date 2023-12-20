@@ -1,7 +1,7 @@
 package cn.solairelight.filter.chain;
 
 import cn.solairelight.filter.Filter;
-import cn.solairelight.filter.FilterCargo;
+import cn.solairelight.filter.FilterContext;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  */
 public interface FilterChain {
 
-    FilterCargo<?> execute(FilterCargo<?> filterCargo);
+    FilterContext<?> execute(FilterContext<?> filterContext);
 
     default Set<Filter<?>> sorting(Set<? extends Filter<?>> filters) {
         return filters.stream().sorted(Comparator.comparingInt((Filter<?> v) -> v.order())).collect(Collectors.toCollection(LinkedHashSet::new));

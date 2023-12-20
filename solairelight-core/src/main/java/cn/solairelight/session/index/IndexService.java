@@ -1,9 +1,9 @@
 package cn.solairelight.session.index;
 
-import jakarta.annotation.Nullable;
-import jakarta.annotation.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Set;
 
 /**

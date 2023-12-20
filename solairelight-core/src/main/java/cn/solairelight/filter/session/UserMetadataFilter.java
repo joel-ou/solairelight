@@ -1,18 +1,18 @@
 package cn.solairelight.filter.session;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
-import cn.solairelight.filter.FilterCargo;
-import cn.solairelight.properties.SolairelightProperties;
+import cn.solairelight.filter.FilterContext;
 import cn.solairelight.properties.SecureProperties;
+import cn.solairelight.properties.SolairelightProperties;
 import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.WebSocketSessionExpand;
 import cn.solairelight.session.index.IndexService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -32,14 +32,14 @@ public class UserMetadataFilter implements SessionFilter {
     private SolairelightProperties solairelightProperties;
 
     @Override
-    public FilterCargo<BasicSession> execute(FilterCargo<?> filterCargo) {
+    public FilterContext<BasicSession> execute(FilterContext<?> filterContext) {
         SecureProperties secureProperties = solairelightProperties.getSecure();
 
-        Object payload = filterCargo.getPayload();
+        Object payload = filterContext.getPayload();
         WebSocketSessionExpand socketSessionExpand = (WebSocketSessionExpand) payload;
         Object metadataToken = socketSessionExpand.getSessionHeads().get(secureProperties.getMetadataKey());
         if(metadataToken == null){
-            return FilterCargo.pass();
+            return FilterContext.pass();
         }
 
         //parsing metadataToken.
@@ -69,7 +69,7 @@ public class UserMetadataFilter implements SessionFilter {
                         .put(entry.getKey().toString(), entry.getValue());
             }
         }
-        return FilterCargo.pass(socketSessionExpand);
+        return FilterContext.pass(socketSessionExpand);
     }
 
     public static PublicKey stringToPublic(String algorithm, String publicKeyString) {

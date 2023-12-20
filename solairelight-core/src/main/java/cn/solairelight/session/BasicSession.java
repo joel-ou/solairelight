@@ -1,5 +1,6 @@
 package cn.solairelight.session;
 
+import cn.solairelight.cluster.ClusterTools;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,8 +16,7 @@ public abstract class BasicSession {
     @Setter
     private boolean closed = false;
 
-    @Setter
-    private String serviceId;
+    private final String serviceId = ClusterTools.generateNodeId();
 
     private String sessionId;
 

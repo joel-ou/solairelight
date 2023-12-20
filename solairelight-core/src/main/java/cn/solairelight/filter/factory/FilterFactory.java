@@ -1,12 +1,13 @@
 package cn.solairelight.filter.factory;
 
-import jakarta.annotation.PostConstruct;
 import cn.solairelight.filter.chain.FilterChain;
 import cn.solairelight.filter.chain.InboundMessageFilterChain;
 import cn.solairelight.filter.chain.OutboundMessageFilterChain;
 import cn.solairelight.filter.chain.SessionFilterChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author Joel Ou

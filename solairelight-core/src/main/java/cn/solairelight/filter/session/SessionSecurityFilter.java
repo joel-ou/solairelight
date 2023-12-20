@@ -1,7 +1,7 @@
 package cn.solairelight.filter.session;
 
 import cn.solairelight.session.BasicSession;
-import cn.solairelight.filter.FilterCargo;
+import cn.solairelight.filter.FilterContext;
 
 /**
  * @author Joel Ou
@@ -9,8 +9,8 @@ import cn.solairelight.filter.FilterCargo;
 public class SessionSecurityFilter implements SessionFilter {
 
     @Override
-    public FilterCargo<BasicSession> execute(FilterCargo<?> filterCargo) {
-        return FilterCargo.pass();
+    public FilterContext<BasicSession> execute(FilterContext<?> filterContext) {
+        return FilterContext.pass();
     }
 
     @Override

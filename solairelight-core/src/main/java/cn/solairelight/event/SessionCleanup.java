@@ -1,11 +1,12 @@
 package cn.solairelight.event;
 
 import cn.solairelight.session.BasicSession;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import cn.solairelight.session.SessionBroker;
 import cn.solairelight.session.index.IndexService;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author Joel Ou

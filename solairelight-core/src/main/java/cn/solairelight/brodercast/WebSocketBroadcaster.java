@@ -3,12 +3,12 @@ package cn.solairelight.brodercast;
 import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.SessionFinder;
 import cn.solairelight.session.WebSocketSessionExpand;
-import jakarta.annotation.Resource;
 import cn.solairelight.exception.NoSessionFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 
 /**

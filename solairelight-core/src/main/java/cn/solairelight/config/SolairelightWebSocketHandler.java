@@ -2,17 +2,18 @@ package cn.solairelight.config;
 
 import cn.solairelight.event.EventContext;
 import cn.solairelight.event.EventFactory;
-import cn.solairelight.filter.FilterCargo;
+import cn.solairelight.filter.FilterContext;
 import cn.solairelight.filter.factory.FilterFactory;
 import cn.solairelight.forward.ForwardService;
 import cn.solairelight.session.WebSocketSessionExpand;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.annotation.Resource;
 
 /**
  * @author Joel Ou
@@ -28,7 +29,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         log.debug("new session from {}", session.getHandshakeInfo());
         WebSocketSessionExpand sessionExpand = WebSocketSessionExpand.create(session);
         //executing the filter chain of session
-        FilterFactory.session().execute(FilterCargo.init(sessionExpand));
+        FilterFactory.session().execute(FilterContext.init(sessionExpand));
 
         //get receiver
         Flux<WebSocketMessage> receiver = session.receive();
@@ -59,7 +60,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         return receiver.doOnNext(message->{
             log.debug("receive message from client, message: {}", message.getPayloadAsText());
             //executing filters
-            FilterCargo<?> result = FilterFactory.inboundMessage().execute(FilterCargo.init(message));
+            FilterContext<?> result = FilterFactory.inboundMessage().execute(FilterContext.init(message));
             //do forward
             forwardService.forward(sessionExpand, result.getPayload());
             //trigger events
@@ -71,7 +72,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         sender.doOnNext(message->{
             log.debug("send a message : {}", message.getPayloadAsText());
             //executing filters
-            FilterFactory.outboundMessage().execute(FilterCargo.init(message));
+            FilterFactory.outboundMessage().execute(FilterContext.init(message));
             //trigger events
             EventFactory.getTrigger(EventContext.EventType.OUTGOING_MESSAGE).call(message);
         });

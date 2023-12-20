@@ -5,7 +5,6 @@ import cn.solairelight.exception.ResponseMessageException;
 import cn.solairelight.expression.ExpressionEvaluator;
 import cn.solairelight.expression.SpringExpressionEvaluator;
 import cn.solairelight.session.index.IndexService;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;

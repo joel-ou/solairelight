@@ -1,11 +1,11 @@
 package cn.solairelight.filter.session;
 
-import cn.solairelight.filter.FilterCargo;
+import cn.solairelight.filter.FilterContext;
 import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.SessionBroker;
 import cn.solairelight.session.WebSocketSessionExpand;
-import jakarta.annotation.Nullable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -20,10 +20,9 @@ import java.util.Map;
 public class WebSocketSessionFilter implements SessionFilter {
 
     @Override
-    public FilterCargo<BasicSession> execute(FilterCargo<?> filterCargo) {
-        Object payload = filterCargo.getPayload();
+    public FilterContext<BasicSession> execute(FilterContext<?> filterContext) {
+        Object payload = filterContext.getPayload();
         WebSocketSessionExpand socketSessionExpand = (WebSocketSessionExpand) payload;
-        socketSessionExpand.setServiceId("0");
 
         Map<String, String> sessionHeads = socketSessionExpand.getSessionHeads();
         //handle session heads;
@@ -52,7 +51,7 @@ public class WebSocketSessionFilter implements SessionFilter {
 
         //storage the session
         SessionBroker.getStorage().put(socketSessionExpand.getSessionId(), socketSessionExpand);
-        return FilterCargo.pass(socketSessionExpand);
+        return FilterContext.pass(socketSessionExpand);
     }
 
     @Override

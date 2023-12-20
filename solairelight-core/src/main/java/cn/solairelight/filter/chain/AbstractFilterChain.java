@@ -2,7 +2,7 @@ package cn.solairelight.filter.chain;
 
 import lombok.extern.slf4j.Slf4j;
 import cn.solairelight.filter.Filter;
-import cn.solairelight.filter.FilterCargo;
+import cn.solairelight.filter.FilterContext;
 
 import java.util.Set;
 
@@ -18,8 +18,8 @@ public abstract class AbstractFilterChain implements FilterChain {
     }
 
     @Override
-    public FilterCargo<?> execute(FilterCargo<?> filterCargo) {
-        FilterCargo<?> relay = filterCargo;
+    public FilterContext<?> execute(FilterContext<?> filterContext) {
+        FilterContext<?> relay = filterContext;
         for (Filter<?> filter : filters) {
             relay = filter.execute(relay);
             if(!relay.isPass()) {
