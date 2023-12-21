@@ -16,7 +16,7 @@ public abstract class BasicSession {
     @Setter
     private boolean closed = false;
 
-    private final String serviceId = ClusterTools.generateNodeId();
+    private final String serviceId = ClusterTools.getNodeId();
 
     private String sessionId;
 

@@ -1,103 +1,72 @@
 package cn.solairelight.cluster;
 
 import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 
-import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Joel Ou
  */
 @Getter
-public class ZookeeperClusterMonitor implements ClusterMonitor, Watcher, AsyncCallback.StatCallback {
+@Slf4j
+public class ZookeeperClusterMonitor implements Watcher, AsyncCallback.StatCallback {
+    @Setter
     private ZooKeeper zooKeeper;
-    private final String zNode;
-    private byte[] prevData;
 
-    public ZookeeperClusterMonitor(String zNode) {
-        this.zNode = zNode;
-        // Get things started by checking if the node exists. We are going
-        // to be completely event driven
-//        zooKeeper.exists(zNode, true, this, null);
+    private static final Pattern nodeIdPattern = Pattern.compile("^.+node-(.+)-.+$");
+
+    @Override
+    public void process(WatchedEvent event) {
+        if(event.getType() == Event.EventType.None)return;
+        boolean isDataNode = event.getPath().contains("data");
+        String nodeId = getNodeIdByPath(event.getPath());
+        switch (event.getType()) {
+            case NodeCreated:
+            case NodeDataChanged:
+                addData(isDataNode, nodeId, event);
+                break;
+            case NodeDeleted:
+                if(!isDataNode){
+                    ClusterDataStorage.getInstance().deleteNode(nodeId);
+                }
+                break;
+        }
+        log.info("a event triggered. {}", event);
     }
 
     /**
-     * Other classes use the DataMonitor by implementing this method
+     * callback of the exists()
+     * @param rc   The return code or the result of the call.
+     * @param path The path that we passed to asynchronous calls.
+     * @param ctx  Whatever context object that we passed to asynchronous calls.
+     * @param stat {@link Stat} object of the node on given path.
      */
-    public interface DataMonitorListener {
-        /**
-         * The existence status of the node has changed.
-         */
-        void exists(byte[] data);
-
-        /**
-         * The ZooKeeper session is no longer valid.
-         *
-         * @param rc
-         *                the ZooKeeper reason code
-         */
-        void closing(int rc);
-    }
-
-    public void process(WatchedEvent event) {
-        String path = event.getPath();
-        if (event.getType() == Event.EventType.None) {
-            // We are are being told that the state of the
-            // connection has changed
-            switch (event.getState()) {
-                case SyncConnected:
-                    // In this particular example we don't need to do anything
-                    // here - watches are automatically re-registered with
-                    // server and any watches triggered while the client was
-                    // disconnected will be delivered (in order of course)
-                    break;
-                case Expired:
-                    // It's all over
-//                    listener.closing(KeeperException.Code.SessionExpired);
-                    break;
-            }
-        } else {
-            if (path != null && path.equals(zNode)) {
-                // Something has changed on the node, let's find out
-                zooKeeper.exists(zNode, true, this, null);
-            }
-        }
-    }
-
+    @Override
     public void processResult(int rc, String path, Object ctx, Stat stat) {
-        boolean exists;
-        switch (rc) {
-            case KeeperException.Code.Ok:
-                exists = true;
-                break;
-            case KeeperException.Code.NoNode:
-                exists = false;
-                break;
-            case KeeperException.Code.SessionExpired:
-            case KeeperException.Code.NoAuth:
-                return;
-            default:
-                // Retry errors
-                zooKeeper.exists(zNode, true, this, null);
-                return;
-        }
+        log.info("stat changed. rc:{}, path:{}, stat:{}", rc, path, stat);
+    }
 
-        byte[] b = null;
-        if (exists) {
-            try {
-                b = zooKeeper.getData(zNode, false, null);
-            } catch (KeeperException e) {
-                // We don't need to worry about recovering now. The watch
-                // callbacks will kick off any exception handling
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                return;
+    private String getNodeIdByPath(String path){
+        Matcher matcher = nodeIdPattern.matcher(path);
+        return matcher.find()?matcher.group(1):null;
+    }
+
+    private void addData(boolean isDataNode, String nodeId, WatchedEvent event){
+        try {
+            byte[] bytes = this.zooKeeper.getData(event.getPath(), false, null);
+            if(isDataNode){
+                ClusterDataStorage.getInstance().addNodeData(bytes, nodeId);
+            } else {
+                ClusterDataStorage.getInstance().addNodeInfo(bytes);
             }
-        }
-        if ((b == null && b != prevData)
-                || (b != null && !Arrays.equals(prevData, b))) {
-            prevData = b;
+        } catch (KeeperException | InterruptedException e) {
+            log.error("add node data failed.", e);
+            throw new RuntimeException(e);
         }
     }
 }

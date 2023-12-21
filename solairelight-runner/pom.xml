@@ -78,11 +78,9 @@
         </dependency>
 
         <dependency>
-            <groupId>cn.solairelight</groupId>
-            <artifactId>solairelight-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/lib/solairelight-core-0.0.1-SNAPSHOT.jar</systemPath>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.7.2</version>
         </dependency>
     </dependencies>
 

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.Random;
 
@@ -18,7 +19,7 @@ public class ClusterTools {
 
     private static String NODE_ID;
 
-    public static synchronized String generateNodeId() {
+    public static synchronized String getNodeId() {
         if(NODE_ID != null){return NODE_ID;}
         NODE_ID = getMAC()+String.format("%04d", random.nextInt(9999));
         return NODE_ID;
@@ -29,18 +30,39 @@ public class ClusterTools {
         return Boolean.parseBoolean(env);
     }
 
-    private static int getMAC(){
+    public static String getLocalIPAddress() {
         try {
-            InetAddress localHost = InetAddress.getLocalHost();
-            byte[] mac = NetworkInterface.getByInetAddress(localHost).getHardwareAddress();
-            if(mac == null){
-                Enumeration<NetworkInterface> networkInterfaces =  NetworkInterface.getNetworkInterfaces();
-                while (networkInterfaces.hasMoreElements()) {
-                    NetworkInterface networkInterface = networkInterfaces.nextElement();
-                    mac = networkInterface.getHardwareAddress();
-                    if(mac != null){
-                        break;
+            Enumeration<NetworkInterface> faces = NetworkInterface.getNetworkInterfaces();
+            while (faces.hasMoreElements()) {
+                NetworkInterface face = faces.nextElement();
+                if (face.isLoopback() || face.isVirtual() || !face.isUp()) {
+                    continue;
+                }
+                Enumeration<InetAddress> addressEnumeration = face.getInetAddresses();
+                while (addressEnumeration.hasMoreElements()) {
+                    InetAddress address = addressEnumeration.nextElement();
+                    if (!address.isLoopbackAddress()
+                            && address.isSiteLocalAddress()
+                            && !address.isAnyLocalAddress()) {
+                        return address.getHostAddress();
                     }
+                }
+            }
+        } catch (SocketException e) {
+            log.error("get local ip failed", e);
+        }
+        return null;
+    }
+
+    private static String getMAC(){
+        try {
+            byte[] mac = null;
+            Enumeration<NetworkInterface> networkInterfaces =  NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = networkInterfaces.nextElement();
+                mac = networkInterface.getHardwareAddress();
+                if(!networkInterface.isLoopback() && mac != null){
+                    break;
                 }
             }
             assert mac != null;
@@ -49,7 +71,7 @@ public class ClusterTools {
                 String s =  String.format("%02X", b);
                 sb.append(s);
             }
-            return sb.toString().hashCode();
+            return sb.toString();
         } catch (Exception e) {
             log.error("getMAC failed.", e);
             throw new RuntimeException(e);

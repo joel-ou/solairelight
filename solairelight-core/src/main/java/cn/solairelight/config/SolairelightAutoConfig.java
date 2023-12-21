@@ -1,6 +1,7 @@
 package cn.solairelight.config;
 
 import cn.solairelight.SolairelightPackage;
+import cn.solairelight.SolairelightRegister;
 import cn.solairelight.brodercast.BroadcastRequestFunctionHandler;
 import cn.solairelight.brodercast.BroadcastService;
 import cn.solairelight.event.EventContext;
@@ -17,7 +18,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.zookeeper.ZooKeeper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.reactive.HandlerMapping;
@@ -36,6 +40,7 @@ import java.util.Set;
  */
 @AutoConfiguration
 @ComponentScan(basePackageClasses= SolairelightPackage.class)
+@ConditionalOnProperty(value = "solairelight.enable", havingValue = "true")
 @Slf4j
 public class SolairelightAutoConfig {
 
@@ -96,5 +101,12 @@ public class SolairelightAutoConfig {
     @Bean
     public SolairelightWebSocketHandler muskmelonWebSocketHandler(){
         return new SolairelightWebSocketHandler();
+    }
+
+    @Bean
+    @ConditionalOnClass(ZooKeeper.class)
+    @ConditionalOnProperty(value = "solairelight.standalone", havingValue = "false")
+    public SolairelightRegister solairelightRegister(){
+        return new SolairelightRegister();
     }
 }

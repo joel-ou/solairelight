@@ -16,6 +16,6 @@ public class Application {
                 .sources(Application.class)
                 .web(WebApplicationType.REACTIVE)
                 .build();
-        springApplication.run();
+        springApplication.run().start();
     }
 }

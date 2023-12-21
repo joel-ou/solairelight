@@ -19,5 +19,5 @@ public class SolairelightProperties {
     private MessageProperties message;
     private SessionProperties session;
     private ForwardProperties forward;
-    private String zookeeper;
+    private SolairelightZookeeperProperties zookeeper;
 }

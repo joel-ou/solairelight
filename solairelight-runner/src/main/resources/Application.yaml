@@ -1,3 +1,6 @@
+server:
+  port: 8081
+
 logging:
   level:
     cn.solairelight.*: debug
@@ -7,6 +10,9 @@ logging:
 solairelight:
   enable: true
   websocket-path: /path
+  standalone: false
+  zookeeper:
+    host-port: 127.0.0.1:2181
   secure:
     metadata-key: Metadata-Token
     public-key-base64: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==

@@ -1,10 +1,11 @@
 package cn.solairelight.forward;
 
+import cn.solairelight.cluster.ClusterTools;
 import cn.solairelight.expression.ExpressionEvaluator;
 import cn.solairelight.expression.Operator;
 import cn.solairelight.expression.SpringExpressionEvaluator;
-import cn.solairelight.properties.SolairelightProperties;
 import cn.solairelight.properties.Route;
+import cn.solairelight.properties.SolairelightProperties;
 import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.WebSocketSessionExpand;
 import lombok.Getter;
@@ -20,12 +21,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 
 import javax.annotation.Resource;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Map;
 
 /**
@@ -38,31 +35,10 @@ public class ForwardService {
     private SolairelightProperties solairelightProperties;
 
     @Getter
-    private static String localIPAddress;
-
     private static final String xForwardForKey = "X-Forwarded-For";
 
     static {
-        try {
-            Enumeration<NetworkInterface> faces = NetworkInterface.getNetworkInterfaces();
-            while (faces.hasMoreElements()) {
-                NetworkInterface face = faces.nextElement();
-                if (face.isLoopback() || face.isVirtual() || !face.isUp()) {
-                    continue;
-                }
-                Enumeration<InetAddress> addressEnumeration = face.getInetAddresses();
-                while (addressEnumeration.hasMoreElements()) {
-                    InetAddress address = addressEnumeration.nextElement();
-                    if (!address.isLoopbackAddress()
-                            && address.isSiteLocalAddress()
-                            && !address.isAnyLocalAddress()) {
-                        localIPAddress = address.getHostAddress();
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            log.error("get local ip failed", e);
-        }
+        ClusterTools.getLocalIPAddress();
     }
 
     public void forward(WebSocketSessionExpand sessionExpand, Object message){
@@ -132,6 +108,10 @@ public class ForwardService {
             }
         }
 
+        String localIPAddress = ClusterTools.getLocalIPAddress();
+        if(localIPAddress == null){
+            throw new RuntimeException("local ip is empty.");
+        }
         //handle X-Forwarded-For
         String forwardFor = basicSession.getSessionHeads().get(xForwardForKey);
         if(StringUtils.hasText(forwardFor)){
