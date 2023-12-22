@@ -19,8 +19,12 @@ public class ClusterTools {
 
     private static String NODE_ID;
 
-    public static synchronized String getNodeId() {
+    public static String getNodeId() {
+        return getNodeId(false);
+    }
+    public static synchronized String getNodeId(boolean noRandom) {
         if(NODE_ID != null){return NODE_ID;}
+        if(noRandom) return NODE_ID = getMAC();
         NODE_ID = getMAC()+String.format("%04d", random.nextInt(9999));
         return NODE_ID;
     }

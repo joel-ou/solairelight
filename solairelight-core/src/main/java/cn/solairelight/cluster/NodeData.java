@@ -27,19 +27,35 @@ public class NodeData {
     public static class BasicInfo implements Serializable{
         private static final long serialVersionUID = 1L;
 
+        private BasicInfo(){};
+
         @Setter
         private String ipAddress = ClusterTools.getLocalIPAddress();
 
-        private final String nodeId = ClusterTools.getNodeId();
+        private final String nodeId = ClusterTools.getNodeId(true);
+
+        //1 normal 2 loss 3 failure
+        private final int status = 1;
+
+        private long version;
+
+        @Override
+        public int hashCode() {
+            return nodeId.hashCode();
+        }
+
+        public void updateVersion(){
+            this.version = System.currentTimeMillis();
+        }
+    }
+
+    public static NodeData create(){
+        return new NodeData();
     }
 
     public NodeData addID(String id){
         ids.add(id);
         return this;
-    }
-
-    public static NodeData create(){
-        return new NodeData();
     }
 
     public byte[] getBasicBytes() {

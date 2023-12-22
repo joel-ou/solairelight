@@ -1,5 +1,6 @@
 package cn.solairelight.filter.session;
 
+import cn.solairelight.cluster.SolairelightRedisClient;
 import cn.solairelight.filter.FilterContext;
 import cn.solairelight.properties.SecureProperties;
 import cn.solairelight.properties.SolairelightProperties;
@@ -57,6 +58,11 @@ public class UserMetadataFilter implements SessionFilter {
                 String k=entry.getKey().toString(), v=entry.getValue().toString();
                 socketSessionExpand.getUserMetadata().getUserRanges().put(k, v);
                 indexService.index(k, v, socketSessionExpand.getSessionId());
+
+                //store ids
+                if(k.equals("id")) {
+                    SolairelightRedisClient.getInstance().pushId(v);
+                }
             }
         }
 

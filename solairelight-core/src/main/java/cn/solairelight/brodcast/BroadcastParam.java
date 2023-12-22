@@ -1,4 +1,4 @@
-package cn.solairelight.brodercast;
+package cn.solairelight.brodcast;
 
 import lombok.Data;
 

@@ -13,9 +13,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,21 +29,19 @@ public class SessionFinder {
     private IndexService indexService;
 
     /**
-     * @param range session finding range
+     * @param rangeList session finding range
      * @param predicate session feature predicate
      * @throws ResponseMessageException
      */
-    public Collection<BasicSession> finding(String range, String predicate) throws ResponseMessageException{
-        if(range.equals("*")){
+    public Collection<BasicSession> finding(LinkedList<String[]> rangeList, String predicate) throws ResponseMessageException{
+        if(rangeList == null){
             return SessionBroker.getStorage().getAll();
         }
         //get sessions by range
-        String[] ranges = range.split(",");
         Collection<BasicSession> sessions = new LinkedHashSet<>();
-        for (String r : ranges) {
-            String[] kv = r.split("=");
+        for (String[] kv : rangeList) {
             if(kv.length != 2){
-                throw new ResponseMessageException(ExceptionEnum.INVALID_RANGE_VALUE, r);
+                throw new ResponseMessageException(ExceptionEnum.INVALID_RANGE_VALUE, Arrays.toString(kv));
             }
             Set<String> indexes = indexService.getAll(kv[0], kv[1]);
             if(CollectionUtils.isEmpty(indexes)) continue;

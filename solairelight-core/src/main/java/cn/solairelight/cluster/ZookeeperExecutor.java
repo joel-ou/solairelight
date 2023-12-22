@@ -113,9 +113,15 @@ public class ZookeeperExecutor {
         }
     }
 
+    public void delete() throws InterruptedException, KeeperException {
+        this.zooKeeper.delete("/solairelight/node-367BF6F970648212-0000000012", -1);
+        this.zooKeeper.delete("/solairelight/node-367BF6F970645265-0000000013", -1);
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException, KeeperException {
         ZookeeperExecutor executor = new ZookeeperExecutor("127.0.0.1:2181");
-        executor.createChildPath();
+//        executor.createChildPath();
+//        executor.delete();
         System.out.println(executor.getAllChildes());
 //        zookeeperExecutor.deleteMainNode("");
 //        zookeeperExecutor.createMainPath();

@@ -1,6 +1,8 @@
-package cn.solairelight.brodercast;
+package cn.solairelight.brodcast;
 
 import lombok.Getter;
+
+import java.util.LinkedList;
 
 /**
  * @author Joel Ou
@@ -19,4 +21,6 @@ public interface Broadcaster {
     }
 
     boolean broadcast(BroadcastParam broadcastParam);
+
+    public void localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam);
 }

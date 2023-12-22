@@ -1,4 +1,4 @@
-package cn.solairelight.brodercast;
+package cn.solairelight.brodcast;
 
 import cn.solairelight.exception.ResponseMessageException;
 import lombok.AllArgsConstructor;
@@ -37,7 +37,7 @@ public class BroadcastRequestFunctionHandler {
     }
 
     public static RouterFunction<ServerResponse> broadcast(BroadcastService broadcastService){
-        return RouterFunctions.route().POST("muskmelon/broadcast", request -> {
+        return RouterFunctions.route().POST("solairelight/broadcast", request -> {
             Mono<BroadcastParam> broadcastParam = request.bodyToMono(BroadcastParam.class);
             return broadcastParam
                     .doOnNext(broadcastService::broadcast)

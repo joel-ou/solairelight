@@ -2,8 +2,8 @@ package cn.solairelight.config;
 
 import cn.solairelight.SolairelightPackage;
 import cn.solairelight.SolairelightRegister;
-import cn.solairelight.brodercast.BroadcastRequestFunctionHandler;
-import cn.solairelight.brodercast.BroadcastService;
+import cn.solairelight.brodcast.BroadcastRequestFunctionHandler;
+import cn.solairelight.brodcast.BroadcastService;
 import cn.solairelight.event.EventContext;
 import cn.solairelight.event.EventTrigger;
 import cn.solairelight.filter.chain.InboundMessageFilterChain;
