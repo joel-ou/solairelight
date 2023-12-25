@@ -60,9 +60,10 @@ public class UserMetadataFilter implements SessionFilter {
                 indexService.index(k, v, socketSessionExpand.getSessionId());
 
                 //store ids
-                if(k.equals("id")) {
-                    SolairelightRedisClient.getInstance().pushId(v);
-                }
+                //TODO
+//                if(k.equals("id")) {
+//                    SolairelightRedisClient.getInstance().pushId(v);
+//                }
             }
         }
 

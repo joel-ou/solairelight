@@ -22,5 +22,7 @@ public interface Broadcaster {
 
     boolean broadcast(BroadcastParam broadcastParam);
 
-    public void localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam);
+    void localBroadcast(BroadcastParam broadcastParam);
+
+    void localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam);
 }

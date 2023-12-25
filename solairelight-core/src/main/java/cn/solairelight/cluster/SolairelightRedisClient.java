@@ -2,15 +2,20 @@ package cn.solairelight.cluster;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ReactiveHashOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Joel Ou
@@ -31,25 +36,28 @@ public class SolairelightRedisClient {
     @Getter
     private static SolairelightRedisClient instance;
 
+    private String nodeId;
+
     private SolairelightRedisClient(){}
 
     public static synchronized SolairelightRedisClient init(ReactiveRedisTemplate<String, Object> redisTemplate){
         if(instance != null) return instance;
         SolairelightRedisClient client = new SolairelightRedisClient();
         client.redisTemplate = redisTemplate;
-        client.hashOperations = redisTemplate.opsForHash(RedisSerializationContext.string());
+        client.hashOperations = redisTemplate.opsForHash();
         instance = client;
         return instance;
     }
 
     public void nodeRegister(){
+        nodeId = NODE_INFO.getNodeId();
         NODE_INFO.updateVersion();
         String msgPrefix = buildMsg(NODE_INFO);
         redisTemplate
-                .opsForSet()
-                .add(NODE_REDIS_KEY, NODE_INFO)
+                .opsForValue()
+                .set(buildNodeRedisKey(), NODE_INFO, Duration.ofSeconds(30))
                 .doOnSuccess(r-> {
-                    if(r < 0){
+                    if(!r){
                         log.info("{} register failed. redis returns 0", msgPrefix);
                         throw new RuntimeException("node register failed");
                     } else {
@@ -58,14 +66,29 @@ public class SolairelightRedisClient {
                 })
                 .doOnError(e-> log.error("{} register failed.", msgPrefix, e))
                 .subscribe();
-        redisTemplate.expire(NODE_REDIS_KEY, Duration.ofDays(30));
+        heartbeat();
+    }
+
+    public void heartbeat(){
+        Thread heartbeat = new Thread(()->{
+            while (true) {
+                try {
+                    Thread.sleep(20000L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                redisTemplate.expire(buildNodeRedisKey(), Duration.ofSeconds(30)).subscribe();
+            }
+        });
+        heartbeat.setName("Solairelight-Heartbeat-Thread"+ClusterTools.getNodeId());
+        heartbeat.start();
     }
 
     public void nodeUnregister(){
         String msgPrefix = buildMsg(NODE_INFO);
         redisTemplate
                 .opsForSet()
-                .remove(NODE_REDIS_KEY, NODE_INFO)
+                .remove(buildNodeRedisKey(), NODE_INFO)
                 .doOnSuccess(r-> {
                     if(r < 0){
                         log.info("{} unregister failed. redis returns 0", msgPrefix);
@@ -78,7 +101,19 @@ public class SolairelightRedisClient {
     }
 
     public Flux<NodeData.BasicInfo> getNodes(){
-        return redisTemplate.opsForSet().members(NODE_REDIS_KEY).map(o->(NodeData.BasicInfo) o);
+        ScanOptions scanOptions = ScanOptions.scanOptions()
+                .match(NODE_REDIS_KEY+":*")
+                .build();
+        return redisTemplate.scan(scanOptions)
+                .collectList()
+                .flatMapMany(keys->{
+                    if(CollectionUtils.isEmpty(keys)) return Flux.empty();
+                    return redisTemplate
+                            .opsForValue()
+                            .multiGet(keys)
+                            .flatMapMany(Flux::fromIterable)
+                            .cast(NodeData.BasicInfo.class);
+                });
     }
 
     public Mono<NodeData.BasicInfo> getNodesById(String id){
@@ -99,5 +134,9 @@ public class SolairelightRedisClient {
 
     private String buildMsg(NodeData.BasicInfo basicInfo){
         return String.format("node %s ipAddress %s", basicInfo.getNodeId(), basicInfo.getIpAddress());
+    }
+
+    private String buildNodeRedisKey(){
+        return NODE_REDIS_KEY+":"+nodeId;
     }
 }

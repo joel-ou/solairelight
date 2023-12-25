@@ -20,7 +20,7 @@ public class ClusterTools {
     private static String NODE_ID;
 
     public static String getNodeId() {
-        return getNodeId(false);
+        return getNodeId(true);
     }
     public static synchronized String getNodeId(boolean noRandom) {
         if(NODE_ID != null){return NODE_ID;}

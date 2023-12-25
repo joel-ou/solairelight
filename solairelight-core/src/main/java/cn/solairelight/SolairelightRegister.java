@@ -1,9 +1,10 @@
 package cn.solairelight;
 
 import cn.solairelight.cluster.ClusterTools;
-import cn.solairelight.cluster.ZookeeperExecutor;
+import cn.solairelight.cluster.SolairelightRedisClient;
 import cn.solairelight.properties.SolairelightProperties;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 
 import javax.annotation.Resource;
 
@@ -16,19 +17,19 @@ public class SolairelightRegister implements SmartLifecycle {
     @Resource
     private SolairelightProperties solairelightProperties;
 
-    public SolairelightRegister(){
-        System.out.println();
-    }
+    @Resource
+    private ReactiveRedisTemplate<String, Object> solairelightRedisTemplate;
 
     @Override
     public void start() {
         ClusterTools.getNodeId();
-        ZookeeperExecutor.init(solairelightProperties.getZookeeper());
+        SolairelightRedisClient.init(solairelightRedisTemplate).nodeRegister();
         this.running = true;
     }
 
     @Override
     public void stop() {
+        SolairelightRedisClient.getInstance().nodeUnregister();
         this.running = false;
     }
 

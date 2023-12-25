@@ -6,8 +6,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.retry.Retry;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Optional;
 
 /**
@@ -37,6 +39,7 @@ public class RestBroadcastDistributor implements BroadcastDistributor {
         String uri = basicInfo.getIpAddress();
         return DistributeWebClient
                 .post(URI.create(uri), broadcastParam)
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))
                 .map(o->new DistributeResult(basicInfo.getNodeId(), o.getStatusCode()));
     }
 }

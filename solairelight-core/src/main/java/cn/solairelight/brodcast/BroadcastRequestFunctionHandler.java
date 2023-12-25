@@ -52,4 +52,21 @@ public class BroadcastRequestFunctionHandler {
                     });
         }).build();
     }
+
+    public static RouterFunction<ServerResponse> distributorEntrance(BroadcastService broadcastService){
+        return RouterFunctions.route().POST("solairelight/distributor/entrance", request -> {
+            Mono<BroadcastParam> broadcastParam = request.bodyToMono(BroadcastParam.class);
+            return broadcastParam
+                    .doOnNext(broadcastService::distributorEntrance)
+                    .map(bol->HttpResponse.success())
+                    .flatMap(response->ServerResponse.ok().bodyValue(response))
+                    .onErrorResume(ResponseMessageException.class, e->{
+                        log.info("broadcast failed {}", e.getMessage());
+                        return ServerResponse.badRequest().bodyValue(HttpResponse.failure(e.getCode(), e.getMessage()));
+                    }).onErrorResume(Exception.class, e->{
+                        log.error("broadcast failed", e);
+                        return ServerResponse.badRequest().bodyValue(HttpResponse.failure("e00", "unknown error"));
+                    });
+        }).build();
+    }
 }

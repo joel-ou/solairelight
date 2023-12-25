@@ -20,4 +20,12 @@ public class BroadcastService {
                 .get(broadcastChannel.getServiceName())
                 .broadcast(broadcastParam);
     }
+
+    public void distributorEntrance(BroadcastParam broadcastParam){
+        String channel = broadcastParam.getChannel().toUpperCase();
+        Broadcaster.BroadcastChannel broadcastChannel = Broadcaster.BroadcastChannel.valueOf(channel);
+        broadcasters
+                .get(broadcastChannel.getServiceName())
+                .localBroadcast(broadcastParam);
+    }
 }
