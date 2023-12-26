@@ -7,9 +7,9 @@ import java.util.Set;
 /**
  * @author Joel Ou
  */
-public class InboundMessageFilterChain extends AbstractFilterChain {
+public class IncomingMessageFilterChain extends AbstractFilterChain {
 
-    public InboundMessageFilterChain(Set<MessageFilter> filters) {
+    public IncomingMessageFilterChain(Set<MessageFilter> filters) {
         super(filters);
     }
 }

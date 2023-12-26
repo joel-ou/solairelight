@@ -7,7 +7,7 @@ import lombok.Data;
  * @author Joel Ou
  */
 @Data
-public class Route {
+public class RouteProperties {
     //http://localhost:8081/example
     private String uri;
 

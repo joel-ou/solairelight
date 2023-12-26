@@ -14,5 +14,5 @@ public class ForwardProperties {
 
     private String forwardHeader = "all";
 
-    private Route[] routes;
+    private RouteProperties[] routeProperties;
 }

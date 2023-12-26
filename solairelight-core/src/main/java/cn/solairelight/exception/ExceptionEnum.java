@@ -9,7 +9,8 @@ import lombok.Getter;
 public enum ExceptionEnum {
     NO_SESSION_FOUND("e01", "no session found"),
     INVALID_RANGE_VALUE("e02", "invalid range value: "),
-    OPERATION_NOT_SUPPORTED("e03", "setValue operation not supported.");
+    OPERATION_NOT_SUPPORTED("e03", "setValue operation not supported."),
+    DUPLICATED_BROADCAST("e04", "duplicated broadcast.");
 
     private final String code;
     private final String message;

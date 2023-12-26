@@ -4,7 +4,7 @@ import cn.solairelight.cluster.ClusterTools;
 import cn.solairelight.expression.ExpressionEvaluator;
 import cn.solairelight.expression.Operator;
 import cn.solairelight.expression.SpringExpressionEvaluator;
-import cn.solairelight.properties.Route;
+import cn.solairelight.properties.RouteProperties;
 import cn.solairelight.properties.SolairelightProperties;
 import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.WebSocketSessionExpand;
@@ -72,8 +72,8 @@ public class ForwardService {
     public String routing(WebSocketSessionExpand sessionExpand, WebSocketMessage webSocketMessage,
                           Map<String, Object> jsonObject){
         ExpressionEvaluator<Object> evaluator = new SpringExpressionEvaluator<>();
-        for (Route route : solairelightProperties.getForward().getRoutes()) {
-            Route.Predicate predicate = route.getPredicate();
+        for (RouteProperties routeProperties : solairelightProperties.getForward().getRouteProperties()) {
+            RouteProperties.Predicate predicate = routeProperties.getPredicate();
             //evl message predicate
             boolean messageResult=false, sessionResult=false;
             if(StringUtils.hasText(predicate.getMessage())){
@@ -85,7 +85,7 @@ public class ForwardService {
             }
             boolean result = predicate.getOperator()== Operator.AND?messageResult&&sessionResult:messageResult||sessionResult;
             if(result){
-                return route.getUri();
+                return routeProperties.getUri();
             }
         }
         return null;

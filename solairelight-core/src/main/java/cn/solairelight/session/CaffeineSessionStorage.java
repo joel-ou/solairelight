@@ -1,9 +1,14 @@
 package cn.solairelight.session;
 
+import cn.solairelight.properties.SolairelightProperties;
 import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Scheduler;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -15,8 +20,18 @@ import java.util.stream.Collectors;
 @Component
 public class CaffeineSessionStorage implements SessionStorage {
 
-    @Resource
-    private Cache<String, BasicSession> sessionCaffeine;
+    private final Cache<String, BasicSession> sessionCaffeine;
+
+    public CaffeineSessionStorage(SolairelightProperties solairelightProperties){
+        int idleTime = solairelightProperties.getSession().getIdle();
+        sessionCaffeine = Caffeine.newBuilder()
+                .maximumSize(10000)
+                .expireAfterAccess(Duration.ofSeconds(idleTime))
+                .scheduler(Scheduler.systemScheduler())
+                .removalListener(new SessionRemovalCallback())
+                .weakValues()
+                .build();
+    }
 
     @Override
     public void put(String key, BasicSession session) {

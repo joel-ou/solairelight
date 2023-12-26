@@ -10,13 +10,12 @@ logging:
 solairelight:
   enable: true
   websocket-path: /path
-  standalone: false
+  cluster:
+    enable: true
+    node-id-suffix: 1
   secure:
     metadata-key: Metadata-Token
     public-key-base64: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==
-    key-provider: https://key-provider.org/
-  message:
-    protocol: protobuf
   session:
     idle: 600 #seconds
     max-number: 20000

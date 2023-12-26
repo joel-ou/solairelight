@@ -1,9 +1,12 @@
 package cn.solairelight.brodcast;
 
+import org.apache.logging.log4j.util.ProcessIdUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Joel Ou
@@ -14,6 +17,9 @@ public class BroadcastService {
     private Map<String, Broadcaster> broadcasters;
 
     public void broadcast(BroadcastParam broadcastParam){
+        if(!StringUtils.hasText(broadcastParam.getId())){
+            broadcastParam.setId(UUID.randomUUID().toString().replace("-", ""));
+        }
         String channel = broadcastParam.getChannel().toUpperCase();
         Broadcaster.BroadcastChannel broadcastChannel = Broadcaster.BroadcastChannel.valueOf(channel);
         broadcasters

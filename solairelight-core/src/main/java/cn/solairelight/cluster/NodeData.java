@@ -2,6 +2,7 @@ package cn.solairelight.cluster;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
@@ -23,14 +24,25 @@ public class NodeData {
 
     private final BasicInfo basicInfo = new BasicInfo();
 
+    public final static NodeData instance = new NodeData();
+
+    private NodeData(){}
+
     @Getter
+    @ToString
     public static class BasicInfo implements Serializable{
         private static final long serialVersionUID = 1L;
+
+        private BasicInfo(){}
 
         @Setter
         private String ipAddress = ClusterTools.getLocalIPAddress();
 
-        private final String nodeId = ClusterTools.getNodeId(true);
+        @Getter
+        @Setter
+        private String port;
+
+        private final String nodeId = ClusterTools.getNodeId();
 
         //1 normal 2 loss 3 failure
         private final int status = 1;
@@ -45,10 +57,6 @@ public class NodeData {
         public void updateVersion(){
             this.version = System.currentTimeMillis();
         }
-    }
-
-    public static NodeData create(){
-        return new NodeData();
     }
 
     public NodeData addID(String id){

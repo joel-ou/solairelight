@@ -2,7 +2,6 @@ package cn.solairelight.cluster;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ReactiveHashOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
@@ -11,11 +10,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author Joel Ou
@@ -27,7 +23,7 @@ public class SolairelightRedisClient {
 
     private final String ID_STORAGE_REDIS_KEY = "solairelight:idStorage";
 
-    private final NodeData.BasicInfo NODE_INFO = new NodeData.BasicInfo();
+    private final NodeData.BasicInfo NODE_INFO = NodeData.instance.getBasicInfo();
 
     private ReactiveRedisTemplate<String, Object> redisTemplate;
 
@@ -87,10 +83,10 @@ public class SolairelightRedisClient {
     public void nodeUnregister(){
         String msgPrefix = buildMsg(NODE_INFO);
         redisTemplate
-                .opsForSet()
-                .remove(buildNodeRedisKey(), NODE_INFO)
+                .opsForValue()
+                .delete(buildNodeRedisKey())
                 .doOnSuccess(r-> {
-                    if(r < 0){
+                    if(!r){
                         log.info("{} unregister failed. redis returns 0", msgPrefix);
                     } else {
                         log.info("{} unregister success.", msgPrefix);
@@ -107,6 +103,7 @@ public class SolairelightRedisClient {
         return redisTemplate.scan(scanOptions)
                 .collectList()
                 .flatMapMany(keys->{
+                    log.info("found nodes: {}", keys);
                     if(CollectionUtils.isEmpty(keys)) return Flux.empty();
                     return redisTemplate
                             .opsForValue()

@@ -60,7 +60,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         return receiver.doOnNext(message->{
             log.debug("receive message from client, message: {}", message.getPayloadAsText());
             //executing filters
-            FilterContext<?> result = FilterFactory.inboundMessage().execute(FilterContext.init(message));
+            FilterContext<?> result = FilterFactory.incomingMessage().execute(FilterContext.init(message));
             //do forward
             forwardService.forward(sessionExpand, result.getPayload());
             //trigger events
@@ -72,7 +72,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         sender.doOnNext(message->{
             log.debug("send a message : {}", message.getPayloadAsText());
             //executing filters
-            FilterFactory.outboundMessage().execute(FilterContext.init(message));
+            FilterFactory.outgoingMessage().execute(FilterContext.init(message));
             //trigger events
             EventFactory.getTrigger(EventContext.EventType.OUTGOING_MESSAGE).call(message);
         });

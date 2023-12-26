@@ -6,8 +6,8 @@ import cn.solairelight.brodcast.BroadcastRequestFunctionHandler;
 import cn.solairelight.brodcast.BroadcastService;
 import cn.solairelight.event.EventContext;
 import cn.solairelight.event.EventTrigger;
-import cn.solairelight.filter.chain.InboundMessageFilterChain;
-import cn.solairelight.filter.chain.OutboundMessageFilterChain;
+import cn.solairelight.filter.chain.IncomingMessageFilterChain;
+import cn.solairelight.filter.chain.OutgoingMessageFilterChain;
 import cn.solairelight.filter.chain.SessionFilterChain;
 import cn.solairelight.filter.message.MessageFilter;
 import cn.solairelight.filter.session.SessionFilter;
@@ -19,9 +19,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -36,7 +34,6 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
-import sun.nio.cs.UTF_8;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -59,13 +56,13 @@ public class SolairelightAutoConfig {
     }
 
     @Bean
-    public InboundMessageFilterChain inboundMessageFilters(Set<MessageFilter> inboundMessageFilterChain){
-        return new InboundMessageFilterChain(inboundMessageFilterChain);
+    public IncomingMessageFilterChain inboundMessageFilters(Set<MessageFilter> inboundMessageFilterChain){
+        return new IncomingMessageFilterChain(inboundMessageFilterChain);
     }
 
     @Bean
-    public OutboundMessageFilterChain outboundMessageFilters(Set<SessionFilter> outboundMessageFilterChain){
-        return new OutboundMessageFilterChain(outboundMessageFilterChain);
+    public OutgoingMessageFilterChain outboundMessageFilters(Set<SessionFilter> outboundMessageFilterChain){
+        return new OutgoingMessageFilterChain(outboundMessageFilterChain);
     }
 
     //event triggers
@@ -77,18 +74,6 @@ public class SolairelightAutoConfig {
             eventTriggers.put(evenType, EventTrigger.create(evenType));
         }
         return eventTriggers;
-    }
-
-    @Bean
-    public Cache<String, BasicSession> sessionCaffeine(SolairelightProperties solairelightProperties){
-        int idleTime = solairelightProperties.getSession().getIdle();
-        return Caffeine.newBuilder()
-                .maximumSize(10000)
-                .expireAfterAccess(Duration.ofSeconds(idleTime))
-                .scheduler(Scheduler.systemScheduler())
-                .removalListener(new SessionRemovalCallback())
-                .weakValues()
-                .build();
     }
 
     @Bean
@@ -111,15 +96,16 @@ public class SolairelightAutoConfig {
     public RouterFunction<ServerResponse> broadcastFunction(BroadcastService broadcastService){
         return BroadcastRequestFunctionHandler.broadcast(broadcastService);
     }
+
     @Bean
-    @ConditionalOnProperty(value = "solairelight.standalone", havingValue = "false")
+    @ConditionalOnProperty(value = "solairelight.cluster.enable", havingValue = "true")
     public RouterFunction<ServerResponse> distributorEntrance(BroadcastService broadcastService){
         return BroadcastRequestFunctionHandler.distributorEntrance(broadcastService);
     }
 
     @Bean
     @ConditionalOnClass(ReactiveRedisTemplate.class)
-    @ConditionalOnProperty(value = "solairelight.standalone", havingValue = "false")
+    @ConditionalOnProperty(value = "solairelight.cluster.enable", havingValue = "true")
     public SolairelightRegister solairelightRegister(){
         return new SolairelightRegister();
     }

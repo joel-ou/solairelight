@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -13,25 +14,26 @@ import java.util.Random;
  */
 @Slf4j
 public class ClusterTools {
-
-    private static long DEFAULT_CUSTOM_EPOCH = 1703030400000L;
     private static final Random random = new Random();
 
     private static String NODE_ID;
 
     public static String getNodeId() {
-        return getNodeId(true);
-    }
-    public static synchronized String getNodeId(boolean noRandom) {
-        if(NODE_ID != null){return NODE_ID;}
-        if(noRandom) return NODE_ID = getMAC();
-        NODE_ID = getMAC()+String.format("%04d", random.nextInt(9999));
         return NODE_ID;
     }
 
-    public boolean isStandalone() {
-        String env = System.getenv().getOrDefault("standalone", String.valueOf(false));
-        return Boolean.parseBoolean(env);
+    public static void initNodeId(String suffix) {
+        initNodeId(true, suffix);
+    }
+
+    public static synchronized void initNodeId(boolean noRandom, String suffix) {
+        if(NODE_ID != null){return;}
+        String suffixStr = Optional.ofNullable(suffix).orElse("");
+        if(noRandom) {
+            NODE_ID = getMAC() + suffixStr;
+            return;
+        }
+        NODE_ID = getMAC()+String.format("%04d", random.nextInt(9999))+suffixStr;
     }
 
     public static String getLocalIPAddress() {

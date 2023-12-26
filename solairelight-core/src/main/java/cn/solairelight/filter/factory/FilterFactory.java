@@ -1,8 +1,8 @@
 package cn.solairelight.filter.factory;
 
 import cn.solairelight.filter.chain.FilterChain;
-import cn.solairelight.filter.chain.InboundMessageFilterChain;
-import cn.solairelight.filter.chain.OutboundMessageFilterChain;
+import cn.solairelight.filter.chain.IncomingMessageFilterChain;
+import cn.solairelight.filter.chain.OutgoingMessageFilterChain;
 import cn.solairelight.filter.chain.SessionFilterChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,17 +17,17 @@ public class FilterFactory {
 
     private SessionFilterChain sessionFilterChain;
 
-    private InboundMessageFilterChain inboundMessageFilterChain;
+    private IncomingMessageFilterChain incomingMessageFilterChain;
 
-    private OutboundMessageFilterChain outboundMessageFilterChain;
+    private OutgoingMessageFilterChain outgoingMessageFilterChain;
 
     private static FilterFactory instance;
 
     @Autowired
-    public FilterFactory(SessionFilterChain sessionFilterChain, InboundMessageFilterChain inboundMessageFilterChain, OutboundMessageFilterChain outboundMessageFilterChain) {
+    public FilterFactory(SessionFilterChain sessionFilterChain, IncomingMessageFilterChain incomingMessageFilterChain, OutgoingMessageFilterChain outgoingMessageFilterChain) {
         this.sessionFilterChain = sessionFilterChain;
-        this.inboundMessageFilterChain = inboundMessageFilterChain;
-        this.outboundMessageFilterChain = outboundMessageFilterChain;
+        this.incomingMessageFilterChain = incomingMessageFilterChain;
+        this.outgoingMessageFilterChain = outgoingMessageFilterChain;
     }
 
     private FilterFactory() {}
@@ -41,11 +41,11 @@ public class FilterFactory {
         return instance.sessionFilterChain;
     }
 
-    public static FilterChain inboundMessage(){
-        return instance.inboundMessageFilterChain;
+    public static FilterChain incomingMessage(){
+        return instance.incomingMessageFilterChain;
     }
 
-    public static FilterChain outboundMessage(){
-        return instance.outboundMessageFilterChain;
+    public static FilterChain outgoingMessage(){
+        return instance.outgoingMessageFilterChain;
     }
 }

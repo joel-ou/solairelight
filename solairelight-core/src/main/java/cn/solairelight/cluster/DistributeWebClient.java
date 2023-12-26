@@ -27,12 +27,12 @@ public class DistributeWebClient {
         webClient = WebClient.builder().clientConnector(connector).build();
     }
 
-    public static Mono<ResponseEntity<String>> post(URI uri,
+    public static Mono<ResponseEntity<String>> post(String uri,
                                                     Object body){
         return post(uri, body, null);
     }
 
-    public static Mono<ResponseEntity<String>> post(URI uri,
+    public static Mono<ResponseEntity<String>> post(String uri,
                                                     Object body,
                                                     MultiValueMap<String, String> headers){
         return webClient

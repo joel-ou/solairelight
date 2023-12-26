@@ -2,8 +2,7 @@ package cn.solairelight.brodcast;
 
 import cn.solairelight.cluster.BroadcastDistributor;
 import cn.solairelight.cluster.ClusterTools;
-import cn.solairelight.cluster.NodeData;
-import cn.solairelight.cluster.SolairelightRedisClient;
+import cn.solairelight.exception.DuplicatedBroadcastException;
 import cn.solairelight.properties.SolairelightProperties;
 import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.SessionFinder;
@@ -12,20 +11,17 @@ import cn.solairelight.exception.NoSessionFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Optional;
 
 /**
  * @author Joel Ou
  */
 @Service
 @Slf4j
-public class WebSocketBroadcaster implements Broadcaster {
-
+public class WebSocketBroadcaster extends AbstractBroadcaster {
     @Resource
     private SessionFinder sessionFinder;
 
@@ -37,7 +33,7 @@ public class WebSocketBroadcaster implements Broadcaster {
 
     @Override
     public boolean broadcast(BroadcastParam broadcastParam) {
-        boolean standalone = solairelightProperties.isStandalone();
+        boolean clusterEnable = solairelightProperties.getCluster().isEnable();
         try {
             if(broadcastParam.getRange().equals("*")){
                 localBroadcast(null, broadcastParam);
@@ -45,10 +41,10 @@ public class WebSocketBroadcaster implements Broadcaster {
                 LinkedList<String[]> exprList = parseRange(broadcastParam.getRange());
                 localBroadcast(exprList, broadcastParam);
             }
-            if(!standalone)
+            if(clusterEnable)
                 broadcastDistributor.distributeAllNode(broadcastParam).subscribe();
         } catch (NoSessionFoundException e) {
-            if(standalone){
+            if(!clusterEnable){
                 throw e;
             }
         }
@@ -63,6 +59,13 @@ public class WebSocketBroadcaster implements Broadcaster {
 
     @Override
     public void localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam){
+        if(super.duplicated(broadcastParam.getId())){
+            log.info("duplicated broadcast {}", broadcastParam);
+            if(solairelightProperties.getCluster().isEnable()) {
+                return;
+            }
+            throw new DuplicatedBroadcastException();
+        }
         Collection<BasicSession> sessions = sessionFinder.finding(exprList,
                 broadcastParam.getPredicate());
         if(CollectionUtils.isEmpty(sessions)) {
@@ -73,6 +76,8 @@ public class WebSocketBroadcaster implements Broadcaster {
             WebSocketSessionExpand webSocketSession = ((WebSocketSessionExpand) session);
             //send message for client
             webSocketSession.getSink().next(webSocketSession.getOriginalSession().textMessage(broadcastParam.getMessage()));
+            //store the broadcast id.
+            super.cache(broadcastParam.getId());
         }
         log.info("broadcast success {} matched", sessions.size());
     }

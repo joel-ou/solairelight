@@ -14,11 +14,10 @@ import org.springframework.stereotype.Component;
 @ToString
 public class SolairelightProperties {
     private boolean enable = true;
-    private boolean standalone = false;
     private String webSocketPath = "/path";
     private SecureProperties secure;
     private MessageProperties message;
     private SessionProperties session;
     private ForwardProperties forward;
-    private SolairelightZookeeperProperties zookeeper;
+    private ClusterProperties cluster;
 }
