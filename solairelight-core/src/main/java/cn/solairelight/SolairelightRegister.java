@@ -16,14 +16,17 @@ import javax.annotation.Resource;
 public class SolairelightRegister implements SmartLifecycle {
     private boolean running = false;
 
-    @Resource
     private SolairelightProperties solairelightProperties;
 
-    @Resource
-    private ReactiveRedisTemplate<String, Object> solairelightRedisTemplate;
+    private ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate;
 
     @Value("${server.port}")
     private String port;
+
+    public SolairelightRegister(SolairelightProperties solairelightProperties, ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate) {
+        this.solairelightProperties = solairelightProperties;
+        this.solairelightRedisTemplate = solairelightRedisTemplate;
+    }
 
     @Override
     public void start() {

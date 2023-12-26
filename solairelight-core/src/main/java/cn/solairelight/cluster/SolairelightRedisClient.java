@@ -25,9 +25,9 @@ public class SolairelightRedisClient {
 
     private final NodeData.BasicInfo NODE_INFO = NodeData.instance.getBasicInfo();
 
-    private ReactiveRedisTemplate<String, Object> redisTemplate;
+    private ReactiveRedisTemplate<Object, Object> redisTemplate;
 
-    private ReactiveHashOperations<String, String, Object> hashOperations;
+    private ReactiveHashOperations<Object, Object, Object> hashOperations;
 
     @Getter
     private static SolairelightRedisClient instance;
@@ -36,7 +36,7 @@ public class SolairelightRedisClient {
 
     private SolairelightRedisClient(){}
 
-    public static synchronized SolairelightRedisClient init(ReactiveRedisTemplate<String, Object> redisTemplate){
+    public static synchronized SolairelightRedisClient init(ReactiveRedisTemplate<Object, Object> redisTemplate){
         if(instance != null) return instance;
         SolairelightRedisClient client = new SolairelightRedisClient();
         client.redisTemplate = redisTemplate;

@@ -33,7 +33,7 @@ public class FilterFactory {
     private FilterFactory() {}
 
     @PostConstruct
-    private void postConstruct() {
+    public void postConstruct() {
         instance = this;
     }
 

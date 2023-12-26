@@ -19,6 +19,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -82,7 +83,7 @@ public class SolairelightAutoConfig {
         map.put(properties.getWebSocketPath(), solairelightWebSocketHandler());
         int order = -1; // before annotated controllers
 
-        log.info("muskmelon websocket stared. path: {}", properties.getWebSocketPath());
+        log.info("solairelight websocket stared. path: {}", properties.getWebSocketPath());
         return new SimpleUrlHandlerMapping(map, order);
     }
 
@@ -104,14 +105,6 @@ public class SolairelightAutoConfig {
     }
 
     @Bean
-    @ConditionalOnClass(ReactiveRedisTemplate.class)
-    @ConditionalOnProperty(value = "solairelight.cluster.enable", havingValue = "true")
-    public SolairelightRegister solairelightRegister(){
-        return new SolairelightRegister();
-    }
-
-
-    @Bean
     public ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate(
             ReactiveRedisConnectionFactory reactiveRedisConnectionFactory, ResourceLoader resourceLoader) {
         RedisSerializer<String> keySerializer = RedisSerializer.string();
@@ -124,5 +117,13 @@ public class SolairelightAutoConfig {
                 .hashValue(valueSerializer)
                 .build();
         return new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, serializationContext);
+    }
+
+    @Bean
+    @ConditionalOnClass(ReactiveRedisTemplate.class)
+    @ConditionalOnProperty(value = "solairelight.cluster.enable", havingValue = "true")
+    public SolairelightRegister solairelightRegister(SolairelightProperties solairelightProperties,
+                                                     ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate){
+        return new SolairelightRegister(solairelightProperties, solairelightRedisTemplate);
     }
 }
