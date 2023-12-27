@@ -86,11 +86,10 @@
         </dependency>
 
         <dependency>
-            <groupId>cn.solairelight</groupId>
+            <groupId>com.solairelight</groupId>
             <artifactId>solairelight-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${pom.basedir}/src/main/resources/solairelight-core-0.0.1-SNAPSHOT.jar</systemPath>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

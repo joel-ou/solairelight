@@ -3,6 +3,7 @@ package cn.solairelight.session;
 import cn.solairelight.cluster.ClusterTools;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Map;
 /**
  * @author Joel Ou
  */
+@ToString
 public abstract class BasicSession {
 
     @Getter

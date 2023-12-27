@@ -1,24 +1,32 @@
 package cn.solairelight.event;
 
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
  * @author Joel Ou
  */
 public class EventThreadPool {
-    private final static ExecutorService threadPool;
+    private final static ForkJoinPool forkJoinPool;
 
     private final static int CPU_CORES = Runtime.getRuntime().availableProcessors();
 
     static {
-        threadPool = new ThreadPoolExecutor(CPU_CORES*2,
-                100,
-                60,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(1000));
+        forkJoinPool = new ForkJoinPool
+                (CPU_CORES*2,
+                        ForkJoinPool.defaultForkJoinWorkerThreadFactory,
+                        null, true);
     }
 
     public static void execute(Runnable runnable){
-        threadPool.execute(runnable);
+        forkJoinPool.execute(runnable);
+    }
+
+    public static Future<?> invokeAll(Callable<?> callable){
+        return forkJoinPool.submit(callable);
+    }
+
+    public static void invokeAll(List<Callable<Object>> callables){
+        forkJoinPool.invokeAll(callables);
     }
 }

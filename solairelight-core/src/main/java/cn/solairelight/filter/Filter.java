@@ -5,7 +5,7 @@ package cn.solairelight.filter;
  */
 public interface Filter<P> {
 
-    FilterContext<P> execute(FilterContext<?> filterContext);
+    FilterContext<P> execute(FilterContext<P> filterContext);
 
     default int order() {
         return 0;

@@ -33,14 +33,14 @@ public class UserMetadataFilter implements SessionFilter {
     private SolairelightProperties solairelightProperties;
 
     @Override
-    public FilterContext<BasicSession> execute(FilterContext<?> filterContext) {
+    public FilterContext<BasicSession> execute(FilterContext<BasicSession> filterContext) {
         SecureProperties secureProperties = solairelightProperties.getSecure();
 
         Object payload = filterContext.getPayload();
         WebSocketSessionExpand socketSessionExpand = (WebSocketSessionExpand) payload;
         Object metadataToken = socketSessionExpand.getSessionHeads().get(secureProperties.getMetadataKey());
         if(metadataToken == null){
-            return FilterContext.pass();
+            return FilterContext.pass(socketSessionExpand);
         }
 
         //parsing metadataToken.
@@ -99,7 +99,7 @@ public class UserMetadataFilter implements SessionFilter {
 
     @Override
     public int order() {
-        return -97;
+        return -98;
     }
 
     public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException {

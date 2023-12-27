@@ -1,18 +1,24 @@
 package cn.solairelight.filter.factory;
 
+import cn.solairelight.filter.Filter;
 import cn.solairelight.filter.chain.FilterChain;
 import cn.solairelight.filter.chain.IncomingMessageFilterChain;
 import cn.solairelight.filter.chain.OutgoingMessageFilterChain;
 import cn.solairelight.filter.chain.SessionFilterChain;
+import cn.solairelight.filter.message.MessageFilter;
+import cn.solairelight.filter.session.SessionFilter;
+import io.jsonwebtoken.security.Message;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * @author Joel Ou
  */
-@Component
 public class FilterFactory {
 
     private SessionFilterChain sessionFilterChain;
@@ -21,20 +27,38 @@ public class FilterFactory {
 
     private OutgoingMessageFilterChain outgoingMessageFilterChain;
 
+    @Getter
     private static FilterFactory instance;
-
-    @Autowired
-    public FilterFactory(SessionFilterChain sessionFilterChain, IncomingMessageFilterChain incomingMessageFilterChain, OutgoingMessageFilterChain outgoingMessageFilterChain) {
-        this.sessionFilterChain = sessionFilterChain;
-        this.incomingMessageFilterChain = incomingMessageFilterChain;
-        this.outgoingMessageFilterChain = outgoingMessageFilterChain;
-    }
 
     private FilterFactory() {}
 
-    @PostConstruct
-    public void postConstruct() {
-        instance = this;
+    public static void init(Set<Filter<?>> filters){
+        instance = new FilterFactory();
+        Set<SessionFilter> sessionFilter = new LinkedHashSet<>();
+        Set<MessageFilter> incomingMessageFilter = new LinkedHashSet<>();
+        Set<MessageFilter> outgoingMessageFilter = new LinkedHashSet<>();
+        for (Filter<?> filter : filters) {
+            if(filter instanceof SessionFilter) {
+                sessionFilter.add((SessionFilter) filter);
+            } else if(filter instanceof MessageFilter){
+                MessageFilter messageFilter = ((MessageFilter) filter);
+                switch (((MessageFilter) filter).getMessageWay()) {
+                    case incoming:
+                        incomingMessageFilter.add(messageFilter);
+                        break;
+                    case outgoing:
+                        outgoingMessageFilter.add(messageFilter);
+                        break;
+                    default:
+                        incomingMessageFilter.add(messageFilter);
+                        outgoingMessageFilter.add(messageFilter);
+                        break;
+                }
+            }
+        }
+        instance.sessionFilterChain = new SessionFilterChain(sessionFilter);
+        instance.incomingMessageFilterChain = new IncomingMessageFilterChain(incomingMessageFilter);
+        instance.outgoingMessageFilterChain = new OutgoingMessageFilterChain(outgoingMessageFilter);
     }
 
     public static FilterChain session(){

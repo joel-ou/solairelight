@@ -5,5 +5,5 @@ package cn.solairelight.event;
  */
 public interface Event<T> {
 
-    void apply(EventContext<T> context);
+    void execute(EventContext<T> context);
 }

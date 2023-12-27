@@ -18,13 +18,13 @@ public abstract class AbstractFilterChain implements FilterChain {
     }
 
     @Override
-    public FilterContext<?> execute(FilterContext<?> filterContext) {
-        FilterContext<?> relay = filterContext;
+    public FilterContext execute(FilterContext<Object> filterContext) {
+        FilterContext relay = filterContext;
         for (Filter<?> filter : filters) {
             relay = filter.execute(relay);
             if(!relay.isPass()) {
                 log.warn("filter chain has abort at {}", filter.getClass().getName());
-                return relay;
+                return relay.setAbortPoint(filter.getClass());
             }
         }
         return relay;

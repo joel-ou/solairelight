@@ -72,7 +72,7 @@ public class ForwardService {
     public String routing(WebSocketSessionExpand sessionExpand, WebSocketMessage webSocketMessage,
                           Map<String, Object> jsonObject){
         ExpressionEvaluator<Object> evaluator = new SpringExpressionEvaluator<>();
-        for (RouteProperties routeProperties : solairelightProperties.getForward().getRouteProperties()) {
+        for (RouteProperties routeProperties : solairelightProperties.getForward().getRoutes()) {
             RouteProperties.Predicate predicate = routeProperties.getPredicate();
             //evl message predicate
             boolean messageResult=false, sessionResult=false;

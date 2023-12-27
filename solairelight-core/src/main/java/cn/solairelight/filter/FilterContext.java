@@ -16,19 +16,22 @@ public class FilterContext<P> {
 
     private P payload;
 
-    public static <P> FilterContext<P> init(P payload){
-        return new FilterContext<>(true, payload);
+    private Class<?> abortPoint;
+
+    public FilterContext<?> setAbortPoint(Class<?> abortPoint) {
+        this.abortPoint = abortPoint;
+        return this;
     }
 
-    public static <P> FilterContext<P> pass(){
-        return new FilterContext<>();
+    public static <P> FilterContext<P> init(P payload){
+        return new FilterContext<>(true, payload, null);
     }
 
     public static <P> FilterContext<P> pass(P payload){
-        return new FilterContext<>(true, payload);
+        return new FilterContext<>(true, payload, null);
     }
 
     public static <P> FilterContext<P> abort(){
-        return new FilterContext<>(false, null);
+        return new FilterContext<>(false, null, null);
     }
 }

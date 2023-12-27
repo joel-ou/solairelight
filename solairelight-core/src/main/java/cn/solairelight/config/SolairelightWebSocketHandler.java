@@ -21,13 +21,17 @@ import javax.annotation.Resource;
 @Slf4j
 public class SolairelightWebSocketHandler implements WebSocketHandler {
 
-    @Resource
-    private ForwardService forwardService;
+    private final ForwardService forwardService;
+
+    public SolairelightWebSocketHandler(ForwardService forwardService) {
+        this.forwardService = forwardService;
+    }
 
     @Override
     public Mono<Void> handle(WebSocketSession session) {
         log.debug("new session from {}", session.getHandshakeInfo());
         WebSocketSessionExpand sessionExpand = WebSocketSessionExpand.create(session);
+
         //executing the filter chain of session
         FilterFactory.session().execute(FilterContext.init(sessionExpand));
 
@@ -58,13 +62,21 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
     private Flux<WebSocketMessage> handleReceive(WebSocketSessionExpand sessionExpand,
                                                  Flux<WebSocketMessage> receiver){
         return receiver.doOnNext(message->{
+            message.retain();
             log.debug("receive message from client, message: {}", message.getPayloadAsText());
             //executing filters
             FilterContext<?> result = FilterFactory.incomingMessage().execute(FilterContext.init(message));
-            //do forward
-            forwardService.forward(sessionExpand, result.getPayload());
+            if(result.isPass()){
+                //do forward
+                forwardService.forward(sessionExpand, result.getPayload());
+            }
             //trigger events
-            EventFactory.getTrigger(EventContext.EventType.OUTGOING_MESSAGE).call(result.getPayload());
+        }).concatMap(message->{
+            return EventFactory
+                    .getTrigger(EventContext.EventType.OUTGOING_MESSAGE)
+                    .call(message)
+                    .doFinally(s->message.release())
+                    .cast(WebSocketMessage.class);
         }).doOnError(error-> log.error("receiving message error occurred ", error));
     }
 

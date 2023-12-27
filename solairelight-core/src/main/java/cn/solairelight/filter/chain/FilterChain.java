@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
  */
 public interface FilterChain {
 
-    FilterContext<?> execute(FilterContext<?> filterContext);
+    FilterContext<Object> execute(FilterContext<Object> filterContext);
 
-    default Set<Filter<?>> sorting(Set<? extends Filter<?>> filters) {
-        return filters.stream().sorted(Comparator.comparingInt((Filter<?> v) -> v.order())).collect(Collectors.toCollection(LinkedHashSet::new));
+    default Set<? extends Filter<?>> sorting(Set<? extends Filter<?>> filters) {
+        return filters.stream().sorted(Comparator.comparingInt(Filter::order)).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

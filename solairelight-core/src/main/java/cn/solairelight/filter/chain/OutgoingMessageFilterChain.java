@@ -1,5 +1,6 @@
 package cn.solairelight.filter.chain;
 
+import cn.solairelight.filter.message.MessageFilter;
 import cn.solairelight.filter.session.SessionFilter;
 
 import java.util.Set;
@@ -9,7 +10,7 @@ import java.util.Set;
  */
 public class OutgoingMessageFilterChain extends AbstractFilterChain {
 
-    public OutgoingMessageFilterChain(Set<SessionFilter> filters) {
+    public OutgoingMessageFilterChain(Set<MessageFilter> filters) {
         super(filters);
     }
 }

@@ -1,8 +1,10 @@
 package cn.solairelight.event;
 
+import cn.solairelight.session.BasicSession;
+
 /**
  * @author Joel Ou
  */
 @EventType(EventContext.EventType.SESSION_DISCONNECTED)
-public interface SessionDisconnectedEvent<T> extends Event<T> {
+public interface SessionDisconnectedEvent extends Event<BasicSession> {
 }

@@ -13,13 +13,13 @@ import javax.annotation.Resource;
  */
 @Slf4j
 @Component
-public class SessionCleanup implements SessionDisconnectedEvent<BasicSession> {
+public class SessionCleanup implements SessionDisconnectedEvent {
 
     @Resource
     private IndexService indexService;
 
     @Override
-    public void apply(EventContext<BasicSession> context) {
+    public void execute(EventContext<BasicSession> context) {
         String sessionId = context.getArgument().getSessionId();
         SessionBroker.getStorage().invalidate(sessionId);
         indexService.deleteBySessionId(sessionId);

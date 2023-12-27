@@ -2,12 +2,15 @@ package cn.solairelight.event;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * @author Joel Ou
  */
 @Builder
-@Data
+@Getter
+@ToString
 public class EventContext<T> {
 
     public enum EventType {

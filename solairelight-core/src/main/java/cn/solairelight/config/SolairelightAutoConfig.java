@@ -6,11 +6,13 @@ import cn.solairelight.brodcast.BroadcastRequestFunctionHandler;
 import cn.solairelight.brodcast.BroadcastService;
 import cn.solairelight.event.EventContext;
 import cn.solairelight.event.EventTrigger;
+import cn.solairelight.filter.Filter;
 import cn.solairelight.filter.chain.IncomingMessageFilterChain;
 import cn.solairelight.filter.chain.OutgoingMessageFilterChain;
 import cn.solairelight.filter.chain.SessionFilterChain;
 import cn.solairelight.filter.message.MessageFilter;
 import cn.solairelight.filter.session.SessionFilter;
+import cn.solairelight.forward.ForwardService;
 import cn.solairelight.properties.SolairelightProperties;
 import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.SessionRemovalCallback;
@@ -50,22 +52,6 @@ import java.util.Set;
 @Slf4j
 public class SolairelightAutoConfig {
 
-    //chains
-    @Bean
-    public SessionFilterChain sessionFilters(Set<SessionFilter> sessionFilters){
-        return new SessionFilterChain(sessionFilters);
-    }
-
-    @Bean
-    public IncomingMessageFilterChain inboundMessageFilters(Set<MessageFilter> inboundMessageFilterChain){
-        return new IncomingMessageFilterChain(inboundMessageFilterChain);
-    }
-
-    @Bean
-    public OutgoingMessageFilterChain outboundMessageFilters(Set<SessionFilter> outboundMessageFilterChain){
-        return new OutgoingMessageFilterChain(outboundMessageFilterChain);
-    }
-
     //event triggers
     @Bean
     public Map<EventContext.EventType, EventTrigger> eventTriggers(){
@@ -78,9 +64,10 @@ public class SolairelightAutoConfig {
     }
 
     @Bean
-    public HandlerMapping handlerMapping(SolairelightProperties properties) {
+    public HandlerMapping handlerMapping(SolairelightProperties properties,
+                                         SolairelightWebSocketHandler solairelightWebSocketHandler) {
         Map<String, WebSocketHandler> map = new HashMap<>();
-        map.put(properties.getWebSocketPath(), solairelightWebSocketHandler());
+        map.put(properties.getWebSocketPath(), solairelightWebSocketHandler);
         int order = -1; // before annotated controllers
 
         log.info("solairelight websocket stared. path: {}", properties.getWebSocketPath());
@@ -88,8 +75,8 @@ public class SolairelightAutoConfig {
     }
 
     @Bean
-    public SolairelightWebSocketHandler solairelightWebSocketHandler(){
-        return new SolairelightWebSocketHandler();
+    public SolairelightWebSocketHandler solairelightWebSocketHandler(ForwardService forwardService){
+        return new SolairelightWebSocketHandler(forwardService);
     }
 
     //functions
@@ -123,7 +110,8 @@ public class SolairelightAutoConfig {
     @ConditionalOnClass(ReactiveRedisTemplate.class)
     @ConditionalOnProperty(value = "solairelight.cluster.enable", havingValue = "true")
     public SolairelightRegister solairelightRegister(SolairelightProperties solairelightProperties,
-                                                     ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate){
-        return new SolairelightRegister(solairelightProperties, solairelightRedisTemplate);
+                                                     ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate,
+                                                     Set<Filter<?>> filters){
+        return new SolairelightRegister(solairelightProperties, solairelightRedisTemplate, filters);
     }
 }

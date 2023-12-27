@@ -7,7 +7,7 @@ public class StatisticEvent implements GlobalEvent {
 
 
     @Override
-    public void apply(EventContext<Object> context) {
+    public void execute(EventContext<Object> context) {
 
     }
 }
