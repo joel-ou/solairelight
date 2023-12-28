@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8089
 
 logging:
   level:
@@ -25,6 +25,6 @@ solairelight:
     routes:
       - uri: http://localhost:8081/example
         predicate:
-          message: version==v1
-          header: h1==v1
-          operator: and
+          message: sampleKey=='v1'
+          session-header: h1==v1
+          operator: or

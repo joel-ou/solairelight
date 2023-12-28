@@ -20,7 +20,7 @@ import java.util.Map;
 public class WebSocketSessionFilter implements SessionFilter {
 
     @Override
-    public FilterContext<BasicSession> execute(FilterContext<BasicSession> filterContext) {
+    public FilterContext<BasicSession> doFilter(FilterContext<BasicSession> filterContext) {
         Object payload = filterContext.getPayload();
         WebSocketSessionExpand socketSessionExpand = (WebSocketSessionExpand) payload;
 

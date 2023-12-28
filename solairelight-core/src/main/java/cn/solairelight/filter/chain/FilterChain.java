@@ -1,6 +1,6 @@
 package cn.solairelight.filter.chain;
 
-import cn.solairelight.filter.Filter;
+import cn.solairelight.filter.SolairelightFilter;
 import cn.solairelight.filter.FilterContext;
 
 import java.util.Comparator;
@@ -15,7 +15,7 @@ public interface FilterChain {
 
     FilterContext<Object> execute(FilterContext<Object> filterContext);
 
-    default Set<? extends Filter<?>> sorting(Set<? extends Filter<?>> filters) {
-        return filters.stream().sorted(Comparator.comparingInt(Filter::order)).collect(Collectors.toCollection(LinkedHashSet::new));
+    default Set<? extends SolairelightFilter<?>> sorting(Set<? extends SolairelightFilter<?>> filters) {
+        return filters.stream().sorted(Comparator.comparingInt(SolairelightFilter::order)).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

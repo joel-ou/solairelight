@@ -16,7 +16,7 @@ public class RouteProperties {
     @Data
     public static class Predicate {
         private String message;
-        private String header;
+        private String sessionHeader;
         private Operator operator;
     }
 }

@@ -1,6 +1,5 @@
-package cn.solairelight.config;
+package cn.solairelight;
 
-import cn.solairelight.MessageWrapper;
 import cn.solairelight.event.EventContext;
 import cn.solairelight.event.EventFactory;
 import cn.solairelight.event.EventTrigger;
@@ -45,7 +44,8 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         //trigger events
         EventFactory
                 .getTrigger(EventContext.EventType.SESSION_CONNECTED)
-                .call(sessionExpand).subscribe();
+                .call(sessionExpand)
+                .subscribe();
         log.debug("session accepted. sessionId: {}, handshakeInfo: {}", sessionExpand.getSessionId(), session.getHandshakeInfo());
         return Flux.zip(receiver, session.send(sender))
                 .doOnError(error-> log.error("session error occurred ", error))
@@ -65,7 +65,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         return receiver
                 .doOnNext(message->{
                     message.retain();
-                    MessageWrapper<WebSocketMessage> messageWrapper = MessageWrapper.create(message);
+                    MessageWrapper messageWrapper = MessageWrapper.create(message);
                     log.debug("receive message from client, message: {}", message.getPayloadAsText());
                     //executing filters
                     FilterContext<?> result = FilterFactory.incomingMessage().execute(FilterContext.init(messageWrapper));
@@ -74,7 +74,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
                         return;
                     }
                     //do forward
-                    forwardService.forward(sessionExpand, (MessageWrapper<Object>) result.getPayload());
+                    forwardService.forward(sessionExpand, (MessageWrapper) result.getPayload());
 
                     //trigger events after filter execute.
                     eventTrigger

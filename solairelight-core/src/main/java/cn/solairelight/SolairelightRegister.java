@@ -3,7 +3,9 @@ package cn.solairelight;
 import cn.solairelight.cluster.ClusterTools;
 import cn.solairelight.cluster.NodeData;
 import cn.solairelight.cluster.SolairelightRedisClient;
-import cn.solairelight.filter.Filter;
+import cn.solairelight.event.EventFactory;
+import cn.solairelight.event.SolairelightEvent;
+import cn.solairelight.filter.SolairelightFilter;
 import cn.solairelight.filter.factory.FilterFactory;
 import cn.solairelight.properties.SolairelightProperties;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,21 +20,25 @@ import java.util.Set;
 public class SolairelightRegister implements SmartLifecycle {
     private boolean running = false;
 
-    private SolairelightProperties solairelightProperties;
+    private final SolairelightProperties solairelightProperties;
 
-    private ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate;
+    private final ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate;
 
-    private Set<Filter<?>> filters;
+    private final Set<SolairelightFilter<?>> filters;
+
+    private final Set<SolairelightEvent<?>> events;
 
     @Value("${server.port}")
     private String port;
 
     public SolairelightRegister(SolairelightProperties solairelightProperties,
                                 ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate,
-                                Set<Filter<?>> filters) {
+                                Set<SolairelightFilter<?>> filters,
+                                Set<SolairelightEvent<?>> events) {
         this.solairelightProperties = solairelightProperties;
         this.solairelightRedisTemplate = solairelightRedisTemplate;
         this.filters = filters;
+        this.events = events;
     }
 
     @Override
@@ -41,6 +47,7 @@ public class SolairelightRegister implements SmartLifecycle {
         NodeData.instance.getBasicInfo().setPort(port);
         SolairelightRedisClient.init(solairelightRedisTemplate).nodeRegister();
         FilterFactory.init(this.filters);
+        EventFactory.init(events);
         this.running = true;
     }
 

@@ -2,11 +2,7 @@ package cn.solairelight.event;
 
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -26,9 +22,9 @@ public class EventTrigger {
 
     public <T> Mono<Object> call(T argument){
         return Mono.create(sink->{
-            Set<Event<Object>> events = EventRepository.getEvents(this.eventType);
+            Set<SolairelightEvent<?>> events = EventRepository.getEvents(this.eventType);
             AtomicInteger latch = new AtomicInteger(events.size());
-            for (Event<Object> event : events) {
+            for (SolairelightEvent event : events) {
                 EventContext<Object> context = EventContext
                         .create()
                         .setEventType(this.eventType)

@@ -3,7 +3,7 @@ package cn.solairelight.event;
 /**
  * @author Joel Ou
  */
-public interface Event<T> {
+public interface SolairelightEvent<T> {
 
     void execute(EventContext<T> context);
 }

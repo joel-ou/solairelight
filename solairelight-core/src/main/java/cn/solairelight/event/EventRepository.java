@@ -7,12 +7,11 @@ import java.util.*;
 /**
  * @author Joel Ou
  */
-@Repository
 public class EventRepository {
 
-    private static Map<EventContext.EventType, Set<Event<Object>>> events = new HashMap<>();
+    private static final Map<EventContext.EventType, Set<SolairelightEvent<?>>> events = new HashMap<>();
 
-    public EventRepository(Set<Event> events){
+    public static void init(Set<SolairelightEvent<?>> events){
         events.forEach(event->{
             EventType eventType = null;
             for (Class<?> anInterface : event.getClass().getInterfaces()) {
@@ -25,7 +24,7 @@ public class EventRepository {
         });
     }
 
-    public static Set<Event<Object>> getEvents(EventContext.EventType eventType){
+    public static Set<SolairelightEvent<?>> getEvents(EventContext.EventType eventType){
         return events.getOrDefault(eventType, Collections.emptySet());
     }
 }

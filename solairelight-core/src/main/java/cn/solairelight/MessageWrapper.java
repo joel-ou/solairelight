@@ -10,11 +10,11 @@ import lombok.ToString;
  */
 @Getter
 @ToString
-public class MessageWrapper<T> {
+public class MessageWrapper {
     @Setter
     private Object message;
 
-    private final T rawMessage;
+    private final Object rawMessage;
 
     @Setter
     private boolean forwardable;
@@ -22,11 +22,11 @@ public class MessageWrapper<T> {
     @Setter
     private Object features;
 
-    private MessageWrapper(T rawMessage){
+    private MessageWrapper(Object rawMessage){
         this.rawMessage = rawMessage;
     }
 
-    public static <T> MessageWrapper<T> create(T rawMessage){
-        return new MessageWrapper<>(rawMessage);
+    public static MessageWrapper create(Object rawMessage){
+        return new MessageWrapper(rawMessage);
     }
 }

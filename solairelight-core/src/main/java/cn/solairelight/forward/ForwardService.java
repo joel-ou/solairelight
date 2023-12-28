@@ -11,7 +11,7 @@ import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.WebSocketSessionExpand;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.json.JacksonJsonParser;
+import org.springframework.boot.json.BasicJsonParser;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.lang.Nullable;
@@ -42,12 +42,11 @@ public class ForwardService {
         ClusterTools.getLocalIPAddress();
     }
 
-    public void forward(WebSocketSessionExpand sessionExpand, MessageWrapper<Object> message){
-        if(!message.isForwardable()) {
+    public void forward(WebSocketSessionExpand sessionExpand, MessageWrapper message){
+        if(!message.isForwardable() || message.getFeatures() == null) {
             log.debug("message is not forwardable. {}", message);
             return;
         }
-        Map<String, Object> jsonObject = null;
         try {
             if (!solairelightProperties.getForward().isEnable()) {
                 log.debug("forward not enabled.");
@@ -56,7 +55,7 @@ public class ForwardService {
             Object messageObj = message.getMessage();
             String uri = routing(sessionExpand, message.getFeatures());
             if (uri == null) {
-                log.warn("no route matched. message: {}  config: {}", jsonObject, solairelightProperties.getForward());
+                log.warn("no route matched. message: {}  config: {}", message.getMessage(), solairelightProperties.getForward());
                 return;
             }
             ForwardWebClient
@@ -68,7 +67,7 @@ public class ForwardService {
             log.error("json parse error.", jsonError);
         } catch (Exception e) {
             //catch all exception for avoid the flux stream abort
-            log.error("forward error occurred. message: {}  config: {}", jsonObject, solairelightProperties.getForward(), e);
+            log.error("forward error occurred. message: {}  config: {}", message.getMessage(), solairelightProperties.getForward(), e);
         }
     }
 
@@ -83,8 +82,8 @@ public class ForwardService {
                 messageResult = evaluator.evaluate(predicate.getMessage(), messageFeature);
             }
             //evl session header predicate
-            if(StringUtils.hasText(predicate.getHeader())){
-                sessionResult = evaluator.evaluate(predicate.getHeader(), sessionExpand.getSessionHeads());
+            if(StringUtils.hasText(predicate.getSessionHeader())){
+                sessionResult = evaluator.evaluate(predicate.getSessionHeader(), sessionExpand.getSessionHeads());
             }
             boolean result = predicate.getOperator()== Operator.AND?messageResult&&sessionResult:messageResult||sessionResult;
             if(result){
@@ -137,7 +136,7 @@ public class ForwardService {
             default:
                 return null;
         }
-        JsonParser jsonParser = new JacksonJsonParser();
+        JsonParser jsonParser = new BasicJsonParser();
         return jsonParser.parseMap(json);
     }
 }

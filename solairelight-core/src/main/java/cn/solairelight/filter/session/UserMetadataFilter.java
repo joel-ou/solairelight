@@ -32,7 +32,7 @@ public class UserMetadataFilter implements SessionFilter {
     private SolairelightProperties solairelightProperties;
 
     @Override
-    public FilterContext<BasicSession> execute(FilterContext<BasicSession> filterContext) {
+    public FilterContext<BasicSession> doFilter(FilterContext<BasicSession> filterContext) {
         SecureProperties secureProperties = solairelightProperties.getSecure();
 
         Object payload = filterContext.getPayload();

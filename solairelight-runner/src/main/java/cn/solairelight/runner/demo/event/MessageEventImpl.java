@@ -15,7 +15,7 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 public class MessageEventImpl implements MessageEvent {
 
     @Override
-    public void execute(EventContext<MessageWrapper<Object>> context) {
+    public void execute(EventContext<MessageWrapper> context) {
         System.out.println(context.getArgument().isForwardable());
         log.info("message event. {}", context);
     }

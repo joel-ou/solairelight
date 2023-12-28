@@ -1,29 +1,20 @@
-package cn.solairelight.config;
+package cn.solairelight.autoconfig;
 
 import cn.solairelight.SolairelightPackage;
 import cn.solairelight.SolairelightRegister;
+import cn.solairelight.SolairelightWebSocketHandler;
 import cn.solairelight.brodcast.BroadcastRequestFunctionHandler;
 import cn.solairelight.brodcast.BroadcastService;
-import cn.solairelight.event.EventContext;
-import cn.solairelight.event.EventTrigger;
-import cn.solairelight.filter.Filter;
-import cn.solairelight.filter.chain.IncomingMessageFilterChain;
-import cn.solairelight.filter.chain.OutgoingMessageFilterChain;
-import cn.solairelight.filter.chain.SessionFilterChain;
-import cn.solairelight.filter.message.MessageFilter;
-import cn.solairelight.filter.session.SessionFilter;
+import cn.solairelight.event.SolairelightEvent;
+import cn.solairelight.filter.SolairelightFilter;
 import cn.solairelight.forward.ForwardService;
 import cn.solairelight.properties.SolairelightProperties;
-import cn.solairelight.session.BasicSession;
-import cn.solairelight.session.SessionRemovalCallback;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.Scheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ResourceLoader;
@@ -31,14 +22,12 @@ import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,19 +38,9 @@ import java.util.Set;
 @AutoConfiguration
 @ComponentScan(basePackageClasses= SolairelightPackage.class)
 @ConditionalOnProperty(value = "solairelight.enable", havingValue = "true")
+@AutoConfigureAfter(RedisAutoConfiguration.class)
 @Slf4j
 public class SolairelightAutoConfig {
-
-    //event triggers
-    @Bean
-    public Map<EventContext.EventType, EventTrigger> eventTriggers(){
-        EventContext.EventType[] eventTypes = EventContext.EventType.values();
-        Map<EventContext.EventType, EventTrigger> eventTriggers = new HashMap<>(eventTypes.length);
-        for (EventContext.EventType evenType : eventTypes) {
-            eventTriggers.put(evenType, EventTrigger.create(evenType));
-        }
-        return eventTriggers;
-    }
 
     @Bean
     public HandlerMapping handlerMapping(SolairelightProperties properties,
@@ -96,7 +75,6 @@ public class SolairelightAutoConfig {
             ReactiveRedisConnectionFactory reactiveRedisConnectionFactory, ResourceLoader resourceLoader) {
         RedisSerializer<String> keySerializer = RedisSerializer.string();
         RedisSerializer<Object> valueSerializer = RedisSerializer.java(resourceLoader.getClassLoader());
-        StringRedisSerializer serializer = StringRedisSerializer.UTF_8;
         RedisSerializationContext<Object, Object> serializationContext = RedisSerializationContext
                 .newSerializationContext(keySerializer)
                 .value(valueSerializer)
@@ -111,7 +89,9 @@ public class SolairelightAutoConfig {
     @ConditionalOnProperty(value = "solairelight.cluster.enable", havingValue = "true")
     public SolairelightRegister solairelightRegister(SolairelightProperties solairelightProperties,
                                                      ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate,
-                                                     Set<Filter<?>> filters){
-        return new SolairelightRegister(solairelightProperties, solairelightRedisTemplate, filters);
+                                                     Set<SolairelightFilter<?>> filters,
+                                                     Set<SolairelightEvent<?>> events){
+        return new SolairelightRegister(solairelightProperties, solairelightRedisTemplate,
+                filters, events);
     }
 }

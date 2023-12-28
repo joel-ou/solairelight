@@ -1,14 +1,14 @@
 package cn.solairelight.filter.message;
 
 import cn.solairelight.MessageWrapper;
-import cn.solairelight.filter.Filter;
+import cn.solairelight.filter.SolairelightFilter;
 import lombok.Getter;
 
 /**
  * @author Joel Ou
  */
 @Getter
-public abstract class MessageFilter implements Filter<MessageWrapper<Object>> {
+public abstract class MessageFilter implements SolairelightFilter<MessageWrapper> {
 
     public enum MessageWay {
         none,

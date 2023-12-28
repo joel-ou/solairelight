@@ -1,18 +1,14 @@
 package cn.solairelight.filter.factory;
 
-import cn.solairelight.filter.Filter;
+import cn.solairelight.filter.SolairelightFilter;
 import cn.solairelight.filter.chain.FilterChain;
 import cn.solairelight.filter.chain.IncomingMessageFilterChain;
 import cn.solairelight.filter.chain.OutgoingMessageFilterChain;
 import cn.solairelight.filter.chain.SessionFilterChain;
 import cn.solairelight.filter.message.MessageFilter;
 import cn.solairelight.filter.session.SessionFilter;
-import io.jsonwebtoken.security.Message;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -32,12 +28,12 @@ public class FilterFactory {
 
     private FilterFactory() {}
 
-    public static void init(Set<Filter<?>> filters){
+    public static void init(Set<SolairelightFilter<?>> filters){
         instance = new FilterFactory();
         Set<SessionFilter> sessionFilter = new LinkedHashSet<>();
         Set<MessageFilter> incomingMessageFilter = new LinkedHashSet<>();
         Set<MessageFilter> outgoingMessageFilter = new LinkedHashSet<>();
-        for (Filter<?> filter : filters) {
+        for (SolairelightFilter<?> filter : filters) {
             if(filter instanceof SessionFilter) {
                 sessionFilter.add((SessionFilter) filter);
             } else if(filter instanceof MessageFilter){
