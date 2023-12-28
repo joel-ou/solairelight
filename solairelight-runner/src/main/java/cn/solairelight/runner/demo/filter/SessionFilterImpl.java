@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class SessionFilterImpl implements SessionFilter {
     @Override
     public FilterContext<BasicSession> execute(FilterContext<BasicSession> filterContext) {
+        System.out.println(filterContext.getPayload().getSessionId());
         log.info("session filter. {}", filterContext);
         return FilterContext.pass(filterContext.getPayload());
     }

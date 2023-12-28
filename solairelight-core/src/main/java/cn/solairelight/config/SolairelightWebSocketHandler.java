@@ -1,7 +1,9 @@
 package cn.solairelight.config;
 
+import cn.solairelight.MessageWrapper;
 import cn.solairelight.event.EventContext;
 import cn.solairelight.event.EventFactory;
+import cn.solairelight.event.EventTrigger;
 import cn.solairelight.filter.FilterContext;
 import cn.solairelight.filter.factory.FilterFactory;
 import cn.solairelight.forward.ForwardService;
@@ -12,8 +14,6 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.Resource;
 
 /**
  * @author Joel Ou
@@ -45,7 +45,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         //trigger events
         EventFactory
                 .getTrigger(EventContext.EventType.SESSION_CONNECTED)
-                .call(sessionExpand);
+                .call(sessionExpand).subscribe();
         log.debug("session accepted. sessionId: {}, handshakeInfo: {}", sessionExpand.getSessionId(), session.getHandshakeInfo());
         return Flux.zip(receiver, session.send(sender))
                 .doOnError(error-> log.error("session error occurred ", error))
@@ -54,30 +54,35 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
                             signalType);
                     EventFactory
                             .getTrigger(EventContext.EventType.SESSION_DISCONNECTED)
-                            .call(sessionExpand);
+                            .call(sessionExpand).subscribe();
                 })
                 .then();
     }
 
     private Flux<WebSocketMessage> handleReceive(WebSocketSessionExpand sessionExpand,
                                                  Flux<WebSocketMessage> receiver){
-        return receiver.doOnNext(message->{
-            message.retain();
-            log.debug("receive message from client, message: {}", message.getPayloadAsText());
-            //executing filters
-            FilterContext<?> result = FilterFactory.incomingMessage().execute(FilterContext.init(message));
-            if(result.isPass()){
-                //do forward
-                forwardService.forward(sessionExpand, result.getPayload());
-            }
-            //trigger events
-        }).concatMap(message->{
-            return EventFactory
-                    .getTrigger(EventContext.EventType.OUTGOING_MESSAGE)
-                    .call(message)
-                    .doFinally(s->message.release())
-                    .cast(WebSocketMessage.class);
-        }).doOnError(error-> log.error("receiving message error occurred ", error));
+        EventTrigger eventTrigger = EventFactory.getTrigger(EventContext.EventType.MESSAGE);
+        return receiver
+                .doOnNext(message->{
+                    message.retain();
+                    MessageWrapper<WebSocketMessage> messageWrapper = MessageWrapper.create(message);
+                    log.debug("receive message from client, message: {}", message.getPayloadAsText());
+                    //executing filters
+                    FilterContext<?> result = FilterFactory.incomingMessage().execute(FilterContext.init(messageWrapper));
+                    if(!result.isPass()){
+                        log.info("message aborted at {}. no exception threw.", result.getAbortPoint().getName());
+                        return;
+                    }
+                    //do forward
+                    forwardService.forward(sessionExpand, (MessageWrapper<Object>) result.getPayload());
+
+                    //trigger events after filter execute.
+                    eventTrigger
+                            .call(result.getPayload())
+                            .doFinally(s->message.release()).subscribe();
+                })
+                .onErrorComplete()
+                .doOnError(error-> log.error("receiving message error occurred ", error));
     }
 
     private void handleSender(WebSocketSessionExpand sessionExpand, Flux<WebSocketMessage> sender){
@@ -85,8 +90,6 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
             log.debug("send a message : {}", message.getPayloadAsText());
             //executing filters
             FilterFactory.outgoingMessage().execute(FilterContext.init(message));
-            //trigger events
-            EventFactory.getTrigger(EventContext.EventType.OUTGOING_MESSAGE).call(message);
         });
     }
 }

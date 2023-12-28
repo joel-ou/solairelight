@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 
-import javax.annotation.Resource;
 import java.util.Set;
 
 /**

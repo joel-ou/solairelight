@@ -27,10 +27,11 @@ public class ForwardWebClient {
         webClient = WebClient.builder().clientConnector(connector).build();
     }
 
-    public static Mono<ResponseEntity<String>> post(URI uri, MultiValueMap<String, String> headers){
+    public static Mono<ResponseEntity<String>> post(URI uri, Object body, MultiValueMap<String, String> headers){
         return webClient
                 .post()
                 .uri(uri)
+                .bodyValue(body)
                 .headers(curHeaders-> curHeaders.addAll(headers))
                 .retrieve()
                 .toEntity(String.class);

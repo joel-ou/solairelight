@@ -19,6 +19,7 @@ public class MessageIncomingFilterImpl extends MessageFilter {
 
     @Override
     public FilterContext<MessageWrapper<Object>> execute(FilterContext<MessageWrapper<Object>> filterContext) {
+        System.out.println(filterContext.getPayload().isForwardable());
         log.info("message outgoing filter. {}", filterContext);
         return filterContext;
     }

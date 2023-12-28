@@ -34,6 +34,8 @@ public class SolairelightRedisClient {
 
     private String nodeId;
 
+    private boolean running = false;
+
     private SolairelightRedisClient(){}
 
     public static synchronized SolairelightRedisClient init(ReactiveRedisTemplate<Object, Object> redisTemplate){
@@ -46,6 +48,7 @@ public class SolairelightRedisClient {
     }
 
     public void nodeRegister(){
+        running = true;
         nodeId = NODE_INFO.getNodeId();
         NODE_INFO.updateVersion();
         String msgPrefix = buildMsg(NODE_INFO);
@@ -65,22 +68,8 @@ public class SolairelightRedisClient {
         heartbeat();
     }
 
-    public void heartbeat(){
-        Thread heartbeat = new Thread(()->{
-            while (true) {
-                try {
-                    Thread.sleep(20000L);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                redisTemplate.expire(buildNodeRedisKey(), Duration.ofSeconds(30)).subscribe();
-            }
-        });
-        heartbeat.setName("Solairelight-Heartbeat-Thread"+ClusterTools.getNodeId());
-        heartbeat.start();
-    }
-
     public void nodeUnregister(){
+        running = false;
         String msgPrefix = buildMsg(NODE_INFO);
         redisTemplate
                 .opsForValue()
@@ -127,6 +116,22 @@ public class SolairelightRedisClient {
 
     public void removeId(Object... id){
         hashOperations.remove(ID_STORAGE_REDIS_KEY, id).subscribe();
+    }
+
+    public void heartbeat(){
+        Thread heartbeat = new Thread(()->{
+            while (running) {
+                try {
+                    Thread.sleep(20000L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                if(!running) return;
+                redisTemplate.expire(buildNodeRedisKey(), Duration.ofSeconds(30)).subscribe();
+            }
+        });
+        heartbeat.setName("Solairelight-Heartbeat-Thread"+ClusterTools.getNodeId());
+        heartbeat.start();
     }
 
     private String buildMsg(NodeData.BasicInfo basicInfo){

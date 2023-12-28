@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Joel Ou
@@ -26,18 +27,16 @@ public class EventTrigger {
     public <T> Mono<Object> call(T argument){
         return Mono.create(sink->{
             Set<Event<Object>> events = EventRepository.getEvents(this.eventType);
-            CountDownLatch latch = new CountDownLatch(events.size());
+            AtomicInteger latch = new AtomicInteger(events.size());
             for (Event<Object> event : events) {
                 EventContext<Object> context = EventContext
-                        .builder()
-                        .eventType(this.eventType)
-                        .argument(argument)
-                        .build();
+                        .create()
+                        .setEventType(this.eventType)
+                        .setArgument(argument);
                 //async executing
                 EventThreadPool.execute(()-> {
                     event.execute(context);
-                    latch.countDown();
-                    if(latch.getCount() == 0){
+                    if(latch.decrementAndGet() == 0){
                         sink.success(argument);
                     }
                 });

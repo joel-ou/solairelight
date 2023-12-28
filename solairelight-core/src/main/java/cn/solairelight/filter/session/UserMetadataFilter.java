@@ -1,6 +1,5 @@
 package cn.solairelight.filter.session;
 
-import cn.solairelight.cluster.SolairelightRedisClient;
 import cn.solairelight.filter.FilterContext;
 import cn.solairelight.properties.SecureProperties;
 import cn.solairelight.properties.SolairelightProperties;

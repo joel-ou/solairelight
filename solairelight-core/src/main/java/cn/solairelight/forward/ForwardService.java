@@ -1,5 +1,6 @@
 package cn.solairelight.forward;
 
+import cn.solairelight.MessageWrapper;
 import cn.solairelight.cluster.ClusterTools;
 import cn.solairelight.expression.ExpressionEvaluator;
 import cn.solairelight.expression.Operator;
@@ -41,22 +42,25 @@ public class ForwardService {
         ClusterTools.getLocalIPAddress();
     }
 
-    public void forward(WebSocketSessionExpand sessionExpand, Object message){
+    public void forward(WebSocketSessionExpand sessionExpand, MessageWrapper<Object> message){
+        if(!message.isForwardable()) {
+            log.debug("message is not forwardable. {}", message);
+            return;
+        }
         Map<String, Object> jsonObject = null;
         try {
             if (!solairelightProperties.getForward().isEnable()) {
                 log.debug("forward not enabled.");
                 return;
             }
-            WebSocketMessage webSocketMessage = ((WebSocketMessage) message);
-            jsonObject = messageToJson(webSocketMessage);
-            String uri = routing(sessionExpand, webSocketMessage, jsonObject);
+            Object messageObj = message.getMessage();
+            String uri = routing(sessionExpand, message.getFeatures());
             if (uri == null) {
                 log.warn("no route matched. message: {}  config: {}", jsonObject, solairelightProperties.getForward());
                 return;
             }
             ForwardWebClient
-                    .post(URI.create(uri), headerHandle(sessionExpand))
+                    .post(URI.create(uri), messageObj, headerHandle(sessionExpand))
                     .doOnNext(response -> {
                         log.debug("forwarded response, status {} body {}", response.getStatusCode(), response.getBody());
                     }).subscribe();
@@ -69,15 +73,14 @@ public class ForwardService {
     }
 
     @Nullable
-    public String routing(WebSocketSessionExpand sessionExpand, WebSocketMessage webSocketMessage,
-                          Map<String, Object> jsonObject){
+    public String routing(WebSocketSessionExpand sessionExpand, Object messageFeature){
         ExpressionEvaluator<Object> evaluator = new SpringExpressionEvaluator<>();
         for (RouteProperties routeProperties : solairelightProperties.getForward().getRoutes()) {
             RouteProperties.Predicate predicate = routeProperties.getPredicate();
             //evl message predicate
             boolean messageResult=false, sessionResult=false;
             if(StringUtils.hasText(predicate.getMessage())){
-                messageResult = evaluator.evaluate(predicate.getMessage(), jsonObject);
+                messageResult = evaluator.evaluate(predicate.getMessage(), messageFeature);
             }
             //evl session header predicate
             if(StringUtils.hasText(predicate.getHeader())){
