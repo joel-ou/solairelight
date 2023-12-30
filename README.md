@@ -1,6 +1,5 @@
 # Solairelight
 
-[![CircleCI](https://circleci.com/gh/alibaba/spring-cloud-alibaba/tree/2022.x.svg?style=svg)](https://circleci.com/gh/alibaba/spring-cloud-alibaba/tree/2022.x)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 Solairelight 是基于SpringFLux开发的WebSocket消息服务，支持单机以及集群部署（集群需要Redis）。
