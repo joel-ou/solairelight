@@ -1,6 +1,5 @@
 package cn.solairelight;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -28,5 +27,9 @@ public class MessageWrapper {
 
     public static MessageWrapper create(Object rawMessage){
         return new MessageWrapper(rawMessage);
+    }
+
+    public Object getMessage(){
+        return message==null?rawMessage:message;
     }
 }

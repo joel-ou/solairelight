@@ -12,8 +12,11 @@ public class EventTrigger {
 
     private final EventContext.EventType eventType;
 
+    private final String triggerName;
+
     private EventTrigger(EventContext.EventType eventType){
         this.eventType = eventType;
+        this.triggerName = eventType.name();
     }
 
     public static EventTrigger create(EventContext.EventType eventType) {
@@ -25,9 +28,11 @@ public class EventTrigger {
             Set<SolairelightEvent<?>> events = EventRepository.getEvents(this.eventType);
             AtomicInteger latch = new AtomicInteger(events.size());
             for (SolairelightEvent event : events) {
+                EventType eventType = event.getClass().getAnnotation(EventType.class);
                 EventContext<Object> context = EventContext
                         .create()
-                        .setEventType(this.eventType)
+                        .setEventType(eventType.value())
+                        .setTrigger(this.triggerName)
                         .setArgument(argument);
                 //async executing
                 EventThreadPool.execute(()-> {
@@ -38,5 +43,10 @@ public class EventTrigger {
                 });
             }
         });
+    }
+
+    public enum TriggerName {
+        SessionConnected,
+
     }
 }

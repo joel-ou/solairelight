@@ -1,6 +1,10 @@
 package cn.solairelight.brodcast;
 
+import cn.solairelight.MessageWrapper;
+import cn.solairelight.exception.ExceptionEnum;
 import cn.solairelight.exception.ResponseMessageException;
+import cn.solairelight.filter.FilterContext;
+import cn.solairelight.filter.factory.FilterFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,7 +44,19 @@ public class BroadcastRequestFunctionHandler {
         return RouterFunctions.route().POST("solairelight/broadcast", request -> {
             Mono<BroadcastParam> broadcastParam = request.bodyToMono(BroadcastParam.class);
             return broadcastParam
-                    .doOnNext(broadcastService::broadcast)
+                    .handle((param, sink)->{
+                        MessageWrapper mw = MessageWrapper.create(param);
+                        FilterContext<Object> result = FilterFactory.outgoingMessage().filter(FilterContext.init(mw));
+                        if(result.isPass()) {
+                            sink.next(mw);
+                        } else {
+                            sink.error(new ResponseMessageException(ExceptionEnum.FILTER_ABORTED));
+                        }
+                    })
+                    .map(obj->((MessageWrapper)obj).getMessage())
+                    .doOnNext(message->{
+                        broadcastService.broadcast((BroadcastParam) message);
+                    })
                     .map(bol->HttpResponse.success())
                     .flatMap(response->ServerResponse.ok().bodyValue(response))
                     .onErrorResume(ResponseMessageException.class, e->{

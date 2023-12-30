@@ -32,11 +32,11 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         WebSocketSessionExpand sessionExpand = WebSocketSessionExpand.create(session);
 
         //executing the filter chain of session
-        FilterFactory.session().filter(FilterContext.init(sessionExpand));
+        FilterContext<Object> result = FilterFactory.session().filter(FilterContext.init(sessionExpand));
+        if(!result.isPass()) return Mono.empty().then();
 
         //get receiver
-        Flux<WebSocketMessage> receiver = session.receive();
-        receiver = handleReceive(sessionExpand, receiver);
+        Flux<MessageWrapper> receiver = handleReceive(sessionExpand, session.receive());
         //create message flux for client
         Flux<WebSocketMessage> sender = Flux.create(sessionExpand::setSink);
         handleSender(sessionExpand, sender);
@@ -59,27 +59,30 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
                 .then();
     }
 
-    private Flux<WebSocketMessage> handleReceive(WebSocketSessionExpand sessionExpand,
+    private Flux<MessageWrapper> handleReceive(WebSocketSessionExpand sessionExpand,
                                                  Flux<WebSocketMessage> receiver){
         EventTrigger eventTrigger = EventFactory.getTrigger(EventContext.EventType.MESSAGE);
         return receiver
-                .doOnNext(message->{
+                .handle((message, sink)->{
                     message.retain();
-                    MessageWrapper messageWrapper = MessageWrapper.create(message);
                     log.debug("receive message from client, message: {}", message.getPayloadAsText());
+                    MessageWrapper messageWrapper = MessageWrapper.create(message);
                     //executing filters
                     FilterContext<?> result = FilterFactory.incomingMessage().filter(FilterContext.init(messageWrapper));
-                    if(!result.isPass()){
-                        log.info("message aborted at {}. no exception threw.", result.getAbortPoint().getName());
-                        return;
+                    if(result.isPass()){
+                        sink.next(result.getPayload());
+                    } else {
+                        message.release();
                     }
+                })
+                .map(obj->(MessageWrapper)obj)
+                .doOnNext(message->{
                     //do forward
-                    forwardService.forward(sessionExpand, (MessageWrapper) result.getPayload());
-
+                    forwardService.forward(sessionExpand, message);
                     //trigger events after filter execute.
                     eventTrigger
-                            .call(result.getPayload())
-                            .doFinally(s->message.release()).subscribe();
+                            .call(message)
+                            .doFinally(s->((WebSocketMessage) message.getRawMessage()).release()).subscribe();
                 })
                 .onErrorComplete()
                 .doOnError(error-> log.error("receiving message error occurred ", error));

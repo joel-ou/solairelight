@@ -21,6 +21,6 @@ public class IncomingMessageFilterImpl extends MessageFilter {
     public FilterContext<MessageWrapper> doFilter(FilterContext<MessageWrapper> filterContext) {
         System.out.println(filterContext.getPayload().isForwardable());
         log.info("message incoming filter. {}", filterContext);
-        return filterContext;
+        return FilterContext.pass(filterContext);
     }
 }

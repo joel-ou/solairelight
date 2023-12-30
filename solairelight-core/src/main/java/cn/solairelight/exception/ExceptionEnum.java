@@ -11,7 +11,8 @@ public enum ExceptionEnum {
     INVALID_RANGE_VALUE("e02", "invalid range value: "),
     OPERATION_NOT_SUPPORTED("e03", "setValue operation not supported."),
     DUPLICATED_BROADCAST("e04", "duplicated broadcast."),
-    UNSUPPORTED_BROADCASTING_MESSAGE("e05", "unsupported broadcasting message only support String & Bytes");
+    UNSUPPORTED_BROADCASTING_MESSAGE("e05", "unsupported broadcasting message only support String & Bytes"),
+    FILTER_ABORTED("e06", "filter aborted.");
 
     private final String code;
     private final String message;

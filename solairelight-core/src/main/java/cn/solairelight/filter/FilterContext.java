@@ -31,6 +31,10 @@ public class FilterContext<P> {
         return new FilterContext<>(true, payload, null);
     }
 
+    public static <P> FilterContext<P> pass(FilterContext<P> preceding){
+        return new FilterContext<>(true, preceding.getPayload(), null);
+    }
+
     public static <P> FilterContext<P> abort(){
         return new FilterContext<>(false, null, null);
     }
