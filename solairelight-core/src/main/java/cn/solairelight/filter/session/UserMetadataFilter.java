@@ -4,7 +4,6 @@ import cn.solairelight.filter.FilterContext;
 import cn.solairelight.properties.SecureProperties;
 import cn.solairelight.properties.SolairelightProperties;
 import cn.solairelight.session.BasicSession;
-import cn.solairelight.session.WebSocketSessionExpand;
 import cn.solairelight.session.index.IndexService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -35,11 +34,10 @@ public class UserMetadataFilter implements SessionFilter {
     public FilterContext<BasicSession> doFilter(FilterContext<BasicSession> filterContext) {
         SecureProperties secureProperties = solairelightProperties.getSecure();
 
-        Object payload = filterContext.getPayload();
-        WebSocketSessionExpand socketSessionExpand = (WebSocketSessionExpand) payload;
-        Object metadataToken = socketSessionExpand.getSessionHeads().get(secureProperties.getMetadataKey());
+        BasicSession basicSession = filterContext.getPayload();
+        Object metadataToken = basicSession.getSessionHeads().get(secureProperties.getMetadataKey());
         if(metadataToken == null){
-            return FilterContext.pass(socketSessionExpand);
+            return FilterContext.pass(basicSession);
         }
 
         //parsing metadataToken.
@@ -55,8 +53,8 @@ public class UserMetadataFilter implements SessionFilter {
             //store indexes
             for (Map.Entry<?, ?> entry : ((Map<?, ?>) userRangeObj).entrySet()) {
                 String k=entry.getKey().toString(), v=entry.getValue().toString();
-                socketSessionExpand.getUserMetadata().getUserRanges().put(k, v);
-                indexService.index(k, v, socketSessionExpand.getSessionId());
+                basicSession.getUserMetadata().getUserRanges().put(k, v);
+                indexService.index(k, v, basicSession.getSessionId());
 
                 //store ids
                 //TODO
@@ -69,13 +67,13 @@ public class UserMetadataFilter implements SessionFilter {
         Object userFeatureObj = claims.get("userFeatures");
         if(userFeatureObj instanceof Map) {
             for (Map.Entry<?, ?> entry : ((Map<?, ?>) userFeatureObj).entrySet()) {
-                socketSessionExpand
+                basicSession
                         .getUserMetadata()
                         .getUserFeatures()
                         .put(entry.getKey().toString(), entry.getValue());
             }
         }
-        return FilterContext.pass(socketSessionExpand);
+        return FilterContext.pass(basicSession);
     }
 
     public static PublicKey stringToPublic(String algorithm, String publicKeyString) {

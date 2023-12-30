@@ -13,7 +13,7 @@ public abstract class MessageFilter implements SolairelightFilter<MessageWrapper
     public enum MessageWay {
         none,
         incoming,
-        outgoing;
+        broadcast;
     }
 
     protected MessageWay messageWay = MessageWay.none;

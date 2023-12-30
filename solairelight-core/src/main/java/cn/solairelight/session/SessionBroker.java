@@ -1,22 +1,17 @@
 package cn.solairelight.session;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import cn.solairelight.properties.SolairelightProperties;
 
 /**
  * @author Joel Ou
  */
-@Component
 public class SessionBroker {
 
     private static CaffeineSessionStorage sessionStorage;
 
-    private SessionBroker() {
-    }
-
-    @Autowired
-    public SessionBroker(CaffeineSessionStorage sessionStorage) {
-        SessionBroker.sessionStorage = sessionStorage;
+    public static void init(SolairelightProperties solairelightProperties) {
+        if(sessionStorage != null)return;
+        SessionBroker.sessionStorage = new CaffeineSessionStorage(solairelightProperties);
     }
 
     public static SessionStorage getStorage(){

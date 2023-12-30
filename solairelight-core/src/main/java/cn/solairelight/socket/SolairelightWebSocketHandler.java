@@ -1,12 +1,12 @@
-package cn.solairelight;
+package cn.solairelight.socket;
 
+import cn.solairelight.MessageWrapper;
 import cn.solairelight.event.EventContext;
 import cn.solairelight.event.EventFactory;
 import cn.solairelight.event.EventTrigger;
 import cn.solairelight.filter.FilterContext;
 import cn.solairelight.filter.factory.FilterFactory;
 import cn.solairelight.forward.ForwardService;
-import cn.solairelight.session.WebSocketSessionExpand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -32,7 +32,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         WebSocketSessionExpand sessionExpand = WebSocketSessionExpand.create(session);
 
         //executing the filter chain of session
-        FilterFactory.session().execute(FilterContext.init(sessionExpand));
+        FilterFactory.session().filter(FilterContext.init(sessionExpand));
 
         //get receiver
         Flux<WebSocketMessage> receiver = session.receive();
@@ -68,7 +68,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
                     MessageWrapper messageWrapper = MessageWrapper.create(message);
                     log.debug("receive message from client, message: {}", message.getPayloadAsText());
                     //executing filters
-                    FilterContext<?> result = FilterFactory.incomingMessage().execute(FilterContext.init(messageWrapper));
+                    FilterContext<?> result = FilterFactory.incomingMessage().filter(FilterContext.init(messageWrapper));
                     if(!result.isPass()){
                         log.info("message aborted at {}. no exception threw.", result.getAbortPoint().getName());
                         return;
@@ -89,7 +89,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         sender.doOnNext(message->{
             log.debug("send a message : {}", message.getPayloadAsText());
             //executing filters
-            FilterFactory.outgoingMessage().execute(FilterContext.init(message));
+            FilterFactory.outgoingMessage().filter(FilterContext.init(message));
         });
     }
 }

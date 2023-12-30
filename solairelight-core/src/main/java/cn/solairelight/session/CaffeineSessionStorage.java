@@ -4,10 +4,8 @@ import cn.solairelight.properties.SolairelightProperties;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Resource;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * @author Joel Ou
  */
-@Component
+@Slf4j
 public class CaffeineSessionStorage implements SessionStorage {
 
     private final Cache<String, BasicSession> sessionCaffeine;
@@ -25,7 +23,7 @@ public class CaffeineSessionStorage implements SessionStorage {
     public CaffeineSessionStorage(SolairelightProperties solairelightProperties){
         int idleTime = solairelightProperties.getSession().getIdle();
         sessionCaffeine = Caffeine.newBuilder()
-                .maximumSize(10000)
+                .maximumSize(solairelightProperties.getSession().getMaxNumber())
                 .expireAfterAccess(Duration.ofSeconds(idleTime))
                 .scheduler(Scheduler.systemScheduler())
                 .removalListener(new SessionRemovalCallback())
@@ -36,6 +34,7 @@ public class CaffeineSessionStorage implements SessionStorage {
     @Override
     public void put(String key, BasicSession session) {
         this.sessionCaffeine.put(key, session);
+        log.info("put session key: {} sessionId {}", key, session.getSessionId());
     }
 
     @Override
@@ -53,7 +52,9 @@ public class CaffeineSessionStorage implements SessionStorage {
         if(keys == null) {
             return Collections.emptySet();
         }
-        return keys.stream().map(key->this.sessionCaffeine.getIfPresent(key)).collect(Collectors.toSet());
+        Set<BasicSession> sessions = keys.stream().map(this.sessionCaffeine::getIfPresent).collect(Collectors.toSet());
+        log.info("found session {} by keys {}", sessions.size(), keys);
+        return sessions;
     }
 
     @Override

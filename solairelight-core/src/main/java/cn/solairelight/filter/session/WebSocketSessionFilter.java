@@ -3,7 +3,6 @@ package cn.solairelight.filter.session;
 import cn.solairelight.filter.FilterContext;
 import cn.solairelight.session.BasicSession;
 import cn.solairelight.session.SessionBroker;
-import cn.solairelight.session.WebSocketSessionExpand;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -21,20 +20,19 @@ public class WebSocketSessionFilter implements SessionFilter {
 
     @Override
     public FilterContext<BasicSession> doFilter(FilterContext<BasicSession> filterContext) {
-        Object payload = filterContext.getPayload();
-        WebSocketSessionExpand socketSessionExpand = (WebSocketSessionExpand) payload;
+        BasicSession basicSession = filterContext.getPayload();
 
-        Map<String, String> sessionHeads = socketSessionExpand.getSessionHeads();
+        Map<String, String> sessionHeads = basicSession.getSessionHeads();
         //handle session heads;
-        HandshakeInfo handshakeInfo = socketSessionExpand.getOriginalSession().getHandshakeInfo();
+        HandshakeInfo handshakeInfo = basicSession.getHandshakeInfo();
         handshakeInfo.getHeaders().forEach((k,vs)-> sessionHeads.put(k, vs.get(0)));
         //set client IP
-        String realIP = getClientRealIP(socketSessionExpand);
+        String realIP = getClientRealIP(basicSession);
         if(realIP != null){
-            socketSessionExpand.setClientIP(realIP);
+            basicSession.setClientIP(realIP);
         } else {
-            InetSocketAddress inetSocketAddress = socketSessionExpand.getOriginalSession().getHandshakeInfo().getRemoteAddress();
-            if(inetSocketAddress != null)socketSessionExpand.setClientIP(inetSocketAddress.getHostString());
+            InetSocketAddress inetSocketAddress = basicSession.getHandshakeInfo().getRemoteAddress();
+            if(inetSocketAddress != null)basicSession.setClientIP(inetSocketAddress.getHostString());
         }
 
         //parse url params
@@ -50,8 +48,8 @@ public class WebSocketSessionFilter implements SessionFilter {
         }
 
         //storage the session
-        SessionBroker.getStorage().put(socketSessionExpand.getSessionId(), socketSessionExpand);
-        return FilterContext.pass(socketSessionExpand);
+        SessionBroker.getStorage().put(basicSession.getSessionId(), basicSession);
+        return FilterContext.pass(basicSession);
     }
 
     @Override
@@ -60,8 +58,8 @@ public class WebSocketSessionFilter implements SessionFilter {
     }
 
     @Nullable
-    private String getClientRealIP(WebSocketSessionExpand session){
-        HandshakeInfo handshakeInfo = session.getOriginalSession().getHandshakeInfo();
+    private String getClientRealIP(BasicSession session){
+        HandshakeInfo handshakeInfo = session.getHandshakeInfo();
         HttpHeaders headers = handshakeInfo.getHeaders();
         String ip = headers.getFirst("X-Forwarded-For");
         if (!StringUtils.hasText(ip) || "unknown".equalsIgnoreCase(ip)) {

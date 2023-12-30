@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class MessageIncomingFilterImpl extends MessageFilter {
+public class IncomingMessageFilterImpl extends MessageFilter {
 
-    public MessageIncomingFilterImpl() {
+    public IncomingMessageFilterImpl() {
         super(MessageWay.incoming);
     }
 

@@ -44,7 +44,7 @@ public class BroadcastRequestFunctionHandler {
                     .map(bol->HttpResponse.success())
                     .flatMap(response->ServerResponse.ok().bodyValue(response))
                     .onErrorResume(ResponseMessageException.class, e->{
-                        log.info("broadcast failed {}", e.getMessage());
+                        log.error("broadcast failed {}", e.getMessage());
                         return ServerResponse.badRequest().bodyValue(HttpResponse.failure(e.getCode(), e.getMessage()));
                     }).onErrorResume(Exception.class, e->{
                         log.error("broadcast failed", e);
@@ -61,8 +61,8 @@ public class BroadcastRequestFunctionHandler {
                     .map(bol->HttpResponse.success())
                     .flatMap(response->ServerResponse.ok().bodyValue(response))
                     .onErrorResume(ResponseMessageException.class, e->{
-                        log.info("broadcast failed {}", e.getMessage());
-                        return ServerResponse.badRequest().bodyValue(HttpResponse.failure(e.getCode(), e.getMessage()));
+                        log.error("broadcast failed {}", e.getMessage());
+                        return ServerResponse.ok().bodyValue(HttpResponse.failure(e.getCode(), e.getMessage()));
                     }).onErrorResume(Exception.class, e->{
                         log.error("broadcast failed", e);
                         return ServerResponse.badRequest().bodyValue(HttpResponse.failure("e00", "unknown error"));

@@ -18,7 +18,7 @@ public abstract class AbstractFilterChain implements FilterChain {
     }
 
     @Override
-    public FilterContext execute(FilterContext<Object> filterContext) {
+    public FilterContext filter(FilterContext<Object> filterContext) {
         FilterContext relay = filterContext;
         for (SolairelightFilter<?> filter : filters) {
             relay = filter.doFilter(relay);

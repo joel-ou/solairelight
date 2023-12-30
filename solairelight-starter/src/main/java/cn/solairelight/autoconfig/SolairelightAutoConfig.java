@@ -2,7 +2,7 @@ package cn.solairelight.autoconfig;
 
 import cn.solairelight.SolairelightPackage;
 import cn.solairelight.SolairelightRegister;
-import cn.solairelight.SolairelightWebSocketHandler;
+import cn.solairelight.socket.SolairelightWebSocketHandler;
 import cn.solairelight.brodcast.BroadcastRequestFunctionHandler;
 import cn.solairelight.brodcast.BroadcastService;
 import cn.solairelight.event.SolairelightEvent;

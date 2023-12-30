@@ -42,7 +42,7 @@ public class FilterFactory {
                     case incoming:
                         incomingMessageFilter.add(messageFilter);
                         break;
-                    case outgoing:
+                    case broadcast:
                         outgoingMessageFilter.add(messageFilter);
                         break;
                     default:

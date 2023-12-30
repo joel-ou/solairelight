@@ -8,7 +8,6 @@ import cn.solairelight.expression.SpringExpressionEvaluator;
 import cn.solairelight.properties.RouteProperties;
 import cn.solairelight.properties.SolairelightProperties;
 import cn.solairelight.session.BasicSession;
-import cn.solairelight.session.WebSocketSessionExpand;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.json.BasicJsonParser;
@@ -42,7 +41,7 @@ public class ForwardService {
         ClusterTools.getLocalIPAddress();
     }
 
-    public void forward(WebSocketSessionExpand sessionExpand, MessageWrapper message){
+    public void forward(BasicSession basicSession, MessageWrapper message){
         if(!message.isForwardable() || message.getFeatures() == null) {
             log.debug("message is not forwardable. {}", message);
             return;
@@ -53,13 +52,13 @@ public class ForwardService {
                 return;
             }
             Object messageObj = message.getMessage();
-            String uri = routing(sessionExpand, message.getFeatures());
+            String uri = routing(basicSession, message.getFeatures());
             if (uri == null) {
                 log.warn("no route matched. message: {}  config: {}", message.getMessage(), solairelightProperties.getForward());
                 return;
             }
             ForwardWebClient
-                    .post(URI.create(uri), messageObj, headerHandle(sessionExpand))
+                    .post(URI.create(uri), messageObj, headerHandle(basicSession))
                     .doOnNext(response -> {
                         log.debug("forwarded response, status {} body {}", response.getStatusCode(), response.getBody());
                     }).subscribe();
@@ -72,7 +71,7 @@ public class ForwardService {
     }
 
     @Nullable
-    public String routing(WebSocketSessionExpand sessionExpand, Object messageFeature){
+    public String routing(BasicSession basicSession, Object messageFeature){
         ExpressionEvaluator<Object> evaluator = new SpringExpressionEvaluator<>();
         for (RouteProperties routeProperties : solairelightProperties.getForward().getRoutes()) {
             RouteProperties.Predicate predicate = routeProperties.getPredicate();
@@ -83,7 +82,7 @@ public class ForwardService {
             }
             //evl session header predicate
             if(StringUtils.hasText(predicate.getSessionHeader())){
-                sessionResult = evaluator.evaluate(predicate.getSessionHeader(), sessionExpand.getSessionHeads());
+                sessionResult = evaluator.evaluate(predicate.getSessionHeader(), basicSession.getSessionHeads());
             }
             boolean result = predicate.getOperator()== Operator.AND?messageResult&&sessionResult:messageResult||sessionResult;
             if(result){

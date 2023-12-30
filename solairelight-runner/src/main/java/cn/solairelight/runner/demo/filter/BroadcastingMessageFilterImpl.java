@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class MessageOutgoingFilterImpl extends MessageFilter {
+public class BroadcastingMessageFilterImpl extends MessageFilter {
 
-    public MessageOutgoingFilterImpl() {
-        super(MessageWay.outgoing);
+    public BroadcastingMessageFilterImpl() {
+        super(MessageWay.broadcast);
     }
 
     @Override

@@ -8,6 +8,7 @@ import cn.solairelight.event.SolairelightEvent;
 import cn.solairelight.filter.SolairelightFilter;
 import cn.solairelight.filter.factory.FilterFactory;
 import cn.solairelight.properties.SolairelightProperties;
+import cn.solairelight.session.SessionBroker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -43,8 +44,11 @@ public class SolairelightRegister implements SmartLifecycle {
 
     @Override
     public void start() {
+        //init properties
         ClusterTools.initNodeId(solairelightProperties.getCluster().getNodeIdSuffix());
         NodeData.instance.getBasicInfo().setPort(port);
+        //init components
+        SessionBroker.init(solairelightProperties);
         SolairelightRedisClient.init(solairelightRedisTemplate).nodeRegister();
         FilterFactory.init(this.filters);
         EventFactory.init(events);

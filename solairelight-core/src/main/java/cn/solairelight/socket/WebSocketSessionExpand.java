@@ -1,8 +1,10 @@
-package cn.solairelight.session;
+package cn.solairelight.socket;
 
+import cn.solairelight.session.BasicSession;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.reactive.socket.CloseStatus;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.FluxSink;
@@ -11,7 +13,7 @@ import reactor.core.publisher.FluxSink;
  * @author Joel Ou
  */
 @Getter
-public class WebSocketSessionExpand extends BasicSession {
+class WebSocketSessionExpand extends BasicSession {
     private final WebSocketSession originalSession;
 
     @Setter
@@ -33,5 +35,10 @@ public class WebSocketSessionExpand extends BasicSession {
             originalSession.close(CloseStatus.NORMAL);
             sink.complete();
         }
+    }
+
+    @Override
+    public HandshakeInfo getHandshakeInfo() {
+        return this.originalSession.getHandshakeInfo();
     }
 }

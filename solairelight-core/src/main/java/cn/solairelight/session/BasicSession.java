@@ -4,6 +4,7 @@ import cn.solairelight.cluster.ClusterTools;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.web.reactive.socket.HandshakeInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,4 +43,6 @@ public abstract class BasicSession {
     }
 
     public abstract void close();
+
+    public abstract HandshakeInfo getHandshakeInfo();
 }

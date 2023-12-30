@@ -54,11 +54,13 @@ public class SessionFinder {
         try {
             //filter sessions by predicate
             ExpressionEvaluator<Object> evaluator = new SpringExpressionEvaluator<>();
-            return sessions
+            sessions = sessions
                     .stream()
                     .parallel()
                     .filter(session->evaluator.evaluate(predicate, session.getUserMetadata().getUserFeatures()))
                     .collect(Collectors.toSet());
+            log.info("predicate matched {}.", sessions.size());
+            return sessions;
         } catch (SpelEvaluationException e) {
             if(e.getMessageCode() == SpelMessage.SETVALUE_NOT_SUPPORTED
                     || e.getMessageCode() == SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE){

@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -48,11 +49,15 @@ public class SolairelightRedisClient {
     }
 
     public void nodeRegister(){
+        nodeRegister(false);
+    }
+
+    public void nodeRegister(boolean reRegister){
         running = true;
         nodeId = NODE_INFO.getNodeId();
         NODE_INFO.updateVersion();
         String msgPrefix = buildMsg(NODE_INFO);
-        redisTemplate
+        Mono<Boolean> mono = redisTemplate
                 .opsForValue()
                 .set(buildNodeRedisKey(), NODE_INFO, Duration.ofSeconds(30))
                 .doOnSuccess(r-> {
@@ -63,9 +68,15 @@ public class SolairelightRedisClient {
                         log.info("{} register success.", msgPrefix);
                     }
                 })
-                .doOnError(e-> log.error("{} register failed.", msgPrefix, e))
-                .subscribe();
-        heartbeat();
+                .doOnError(e-> log.error("{} register failed.", msgPrefix, e));
+        if(reRegister){
+            mono = mono.retryWhen(Retry.backoff(3, Duration.ofSeconds(5)).doAfterRetry(signal->{
+                log.error("try register too many times. node failed. {}", signal);
+                Runtime.getRuntime().exit(1);
+            }));
+        }
+        mono.subscribe();
+        if(!reRegister) heartbeat();
     }
 
     public void nodeUnregister(){
@@ -127,7 +138,14 @@ public class SolairelightRedisClient {
                     throw new RuntimeException(e);
                 }
                 if(!running) return;
-                redisTemplate.expire(buildNodeRedisKey(), Duration.ofSeconds(30)).subscribe();
+                redisTemplate
+                        .expire(buildNodeRedisKey(), Duration.ofSeconds(30))
+                        .subscribe(result->{
+                            if(!result) {
+                                log.warn("node heartbeat failed. try re-register.");
+                                nodeRegister(true);
+                            }
+                        });
             }
         });
         heartbeat.setName("Solairelight-Heartbeat-Thread"+ClusterTools.getNodeId());

@@ -16,7 +16,7 @@ public class BroadcastParam {
 
     private String predicate;
 
-    private String message;
+    private Object message;
 
     private int retryTimes;
 }
