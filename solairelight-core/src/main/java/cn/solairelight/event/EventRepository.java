@@ -1,7 +1,5 @@
 package cn.solairelight.event;
 
-import org.springframework.stereotype.Repository;
-
 import java.util.*;
 
 /**
@@ -13,10 +11,7 @@ public class EventRepository {
 
     public static void init(Set<SolairelightEvent<?>> events){
         events.forEach(event->{
-            EventType eventType = null;
-            for (Class<?> anInterface : event.getClass().getInterfaces()) {
-                eventType = anInterface.getAnnotation(EventType.class);
-            }
+            SolairelightEventType eventType = getEventType(event.getClass());
             if(eventType == null){
                 return;
             }
@@ -25,6 +20,21 @@ public class EventRepository {
     }
 
     public static Set<SolairelightEvent<?>> getEvents(EventContext.EventType eventType){
-        return events.getOrDefault(eventType, Collections.emptySet());
+        Set<SolairelightEvent<?>> specificEvents = events.getOrDefault(eventType, Collections.emptySet());
+        specificEvents.addAll(events.getOrDefault(EventContext.EventType.GLOBAL, Collections.emptySet()));
+        return specificEvents;
+    }
+
+    public static SolairelightEventType getEventType(Class<?> aClass){
+        if(aClass == null)return null;
+        for (Class<?> anInterface : aClass.getInterfaces()) {
+            SolairelightEventType annotation = anInterface.getAnnotation(SolairelightEventType.class);
+            if(annotation != null){
+                return annotation;
+            } else {
+                return getEventType(anInterface);
+            }
+        }
+        return null;
     }
 }

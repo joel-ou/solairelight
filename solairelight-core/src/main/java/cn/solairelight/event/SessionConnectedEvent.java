@@ -5,6 +5,6 @@ import cn.solairelight.session.BasicSession;
 /**
  * @author Joel Ou
  */
-@EventType(EventContext.EventType.SESSION_CONNECTED)
+@SolairelightEventType(EventContext.EventType.SESSION_CONNECTED)
 public interface SessionConnectedEvent extends SolairelightEvent<BasicSession> {
 }

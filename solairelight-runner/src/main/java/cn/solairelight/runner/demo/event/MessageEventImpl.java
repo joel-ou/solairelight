@@ -5,7 +5,6 @@ import cn.solairelight.event.EventContext;
 import cn.solairelight.event.MessageEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.socket.WebSocketMessage;
 
 /**
  * @author Joel Ou

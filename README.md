@@ -96,3 +96,124 @@ public class MessageEventImpl implements MessageEvent {
     }
 }
 ```
+
+## 消息转发
+为了兼容旧系统以及自定义的消息格式，Solairelight没有定义用户输入消息的格式。所以在进行消息转发之前需要对消息体进行解析以及填充消息特征用于转发时作为匹配条件。
+<br><br>**为了实现该功能，可以参考以下代码**。
+```java
+@Component
+public class MessageFeatureFilter extends MessageFilter {
+
+    public MessageFeatureFilter() {
+        super(MessageWay.incoming);
+    }
+
+    @Override
+    public FilterContext<MessageWrapper> doFilter(FilterContext<MessageWrapper> filterContext) {
+        MessageWrapper messageWrapper = filterContext.getPayload();
+        WebSocketMessage webSocketMessage = ((WebSocketMessage) filterContext.getPayload().getRawMessage());
+        Map<String, Object> features = new HashMap<>();
+
+        //parse message. this just an example, do not use it directly.
+        JsonParser jsonParser = new BasicJsonParser();
+        String json = webSocketMessage.getPayload().toString(StandardCharsets.UTF_8);
+        Map<String, Object> messageMap = jsonParser.parseMap(json);
+        for (Map.Entry<String, Object> entry : messageMap.entrySet()) {
+            if(entry.getKey().equals("sampleKey"))
+                features.put(entry.getKey(), entry.getValue());
+        }
+        messageWrapper.setMessage(messageMap);
+        messageWrapper.setFeatures(features);
+        messageWrapper.setForwardable(true);
+        return filterContext;
+    }
+
+    @Override
+    public int order() {
+        return 0;
+    }
+}
+```
+<br>你也可以将转发模块关掉，通过注册事件实现自己的转发功能，方法见文档的 “配置” 部分。
+
+## 消息广播
+消息广播可通过调用RestApi对区域内满足特定条件的用户进行广播，也可以全局广播。
+消息广播有固定的格式，目前只支持JSON。
+<br>**消息格式如下**：
+```json
+{
+    "channel":"Websocket",
+    "range": "node==1,node==2,node==3",
+    "predicate": "isVip==true or isVip==false",
+    "message": "dGhpcyBpcyBhIG1lc3NhZ2UgZm9yIGJheWVz",
+    "id": 100
+}
+```
+Channel：固定为Websocket
+<br>Range：广播范围，例如某个端的Session，或者某个房间的Session。后续会说明如何定义一个Session的范围。
+<br>Predicate：Session匹配规则，使用Spring EL表达式模块，数据输入源是Session Feature（后续会讲解）。
+<br>Message：需要广播的原始消息，可以是字符串、Byte数组。Byte数组请Base64编码，广播给用户之前会进行解码。
+<br>ID：该次广播的唯一ID，不可重复，重复的ID不会进行广播操作。
+<br>
+<br>
+**RestApi地址：post host:port/solairelight/broadcast**
+<br>
+响应结果结构：
+```json
+{
+  "success": true,
+  "code": "success",
+  "message": "success"
+}
+```
+
+## 用户会话连接规范
+* Web端因为无法支持自定义的Header，可将自定义的Header信息通过URL参数传入。
+* 所有的Session建立连接时候都需要携带一个Token（JWT）Header，用于标识该Session所属范围，以及用户特征。
+* 该Token的KEY为Metadata-Token，KEY Name可自定义。
+<br>例如：Metadata-Token = eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMiwidXNlclJhbmdlcyI6eyJub2RlIjoxLCJyb29tIjo5OX0sInVzZXJGZWF0dXJlcyI6eyJsZXZlbCI6MTAsImlzVmlwIjpmYWxzZSwibmFtZSI6ImphY2sifX0.a-Nt-O2L_FGNA2LMDmNS05wrlzbsSfX76hSFwKdT9OFSgJ4g8iaMFQB_Br6oSEcAf6whxAt2kOUQFozNIjdzwA
+
+<br>Token格式如下：
+  ```json
+  {
+      "userRanges": {
+        "node": 1,
+        "room": 99
+      },
+      "userFeatures": {
+        "level": 10,
+        "isVip": false,
+        "name": "jack"
+      }
+  }
+  ```
+UserRanges：用于定义Session所属的范围，例如用户所处客户端、以及所处位置。
+用于消息广播时候的广播范围定义。
+<br>UserFeatures：用于定义用户特征，例如是否VIP，名字，用户等级。用于在广播消息时对session进行过滤。
+
+## 配置参数
+```yaml
+#SolairelightConfig example
+solairelight:
+  enable: true
+  websocket-path: /path
+  cluster:
+    enable: true #是否启用集群
+    node-id-suffix: 1 #集群节点ID后缀
+  secure:
+    metadata-key: Metadata-Token
+    #解析JWT只需要公钥
+    public-key-base64: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==
+  session:
+    idle: 600 #seconds session闲置时间
+    max-number: 20000 #单个节点最大可以建立的Session数量
+  forward:
+    enable: true #是否开启用户消息转发
+    forwardHeader: Host #转发Header，会将Session建立时的Header信息进行转发。也可以新增Header，Key=Value格式即是定义新的，如果跟已有的冲突则以新的为准。
+    routes:
+      - uri: http://localhost:8081/example
+        predicate:
+          message: sampleKey=='v1' #转发条件1，对消息信息匹配
+          session-header: h1==v1 #转发条件2，对session头进行匹配
+          operator: or #上述两个条件的逻辑运算符。
+```
