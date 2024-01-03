@@ -3,23 +3,43 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>cn.solairelight</groupId>
+    <groupId>io.github.joel-ou.solairelight</groupId>
     <artifactId>solairelight-spring-boot-starter</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <url>https://github.com/joel-ou/solairelight</url>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Joel Ou</name>
+            <email>8019893@qq.com</email>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/joel-ou/solairelight.git</connection>
+        <developerConnection>scm:git:ssh://github.com/joel-ou/solairelight.git</developerConnection>
+        <url>http://github.com/joel-ou/solairelight</url>
+    </scm>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/joel-ou/solairelight/issues</url>
+    </issueManagement>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-boot-version>2.7.18</spring-boot-version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>cn.solairelight</groupId>
-            <artifactId>solairelight-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <version>${spring-boot-version}</version>
         </dependency>
 
         <dependency>
@@ -27,6 +47,20 @@
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>${spring-boot-version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.joel-ou.solairelight</groupId>
+            <artifactId>solairelight-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

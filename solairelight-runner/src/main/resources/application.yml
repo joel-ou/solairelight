@@ -3,13 +3,13 @@ server:
 
 logging:
   level:
-    cn.solairelight.*: debug
+    com.github.joelou.solairelight.*: debug
 
 
 #SolairelightConfig example
 solairelight:
   enable: true
-  websocket-path: /path
+  websocket-path: /solairelight
   cluster:
     enable: true
     node-id-suffix: 1
@@ -18,7 +18,7 @@ solairelight:
     public-key-base64: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==
   session:
     idle: 600 #seconds
-    max-number: 20000
+    max-number: 1
   forward:
     enable: true
     forwardHeader: Host

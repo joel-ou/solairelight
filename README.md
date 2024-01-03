@@ -11,17 +11,18 @@ Solairelight 是基于SpringFLux开发的WebSocket消息服务，支持单机以
 * **用户端消息转发**：根据用户输入的消息、以及用户会话头信息进行路由转发（需进行二次开发，请看后续文档）。
 * **可自定义的filter、event**：支持自定义filter以及注册自己的event。filter可对消息进行处理、转化、以及剔除非法消息，filter是同步且有序的。event 可以在特定的场景触发执行，event是异步执行且无序。
 * **集群**：可集群部署多个节点，集群支持Redis。
+* **连接请求转发**：当某个节点会话超过限制后，新的连接请求会自动转发到其他节点。
 
 ## 基础要求
 
-* Spring-Boot 2.7.18 </br>
+* Spring-Boot 2.X.X</br>
 * JDK 1.8 及以上
 
 ## 如何使用
 在你的项目POM文件加入依赖。
 ```xml
 <dependency>
-    <groupId>cn.solairelight</groupId>
+    <groupId>com.github.joelou.solairelight</groupId>
     <artifactId>solairelight-spring-boot-starter</artifactId>
     <version>1.0.0-alpha</version>
 </dependency>
@@ -196,7 +197,7 @@ UserRanges：用于定义Session所属的范围，例如用户所处客户端、
 #SolairelightConfig example
 solairelight:
   enable: true
-  websocket-path: /path
+  websocket-path: /solairelight
   cluster:
     enable: true #是否启用集群
     node-id-suffix: 1 #集群节点ID后缀
@@ -206,7 +207,7 @@ solairelight:
     public-key-base64: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==
   session:
     idle: 600 #seconds session闲置时间
-    max-number: 20000 #单个节点最大可以建立的Session数量
+    max-number: 20000 #单个节点最大可以建立的Session数量，0则不限制
   forward:
     enable: true #是否开启用户消息转发
     forwardHeader: Host #转发Header，会将Session建立时的Header信息进行转发。也可以新增Header，Key=Value格式即是定义新的，如果跟已有的冲突则以新的为准。
@@ -217,3 +218,4 @@ solairelight:
           session-header: h1==v1 #转发条件2，对session头进行匹配
           operator: or #上述两个条件的逻辑运算符。
 ```
+集群节点ID后缀可以通过添加JAVA的执行参数设置 java -Dsolairelight.cluster.nodeIdSuffix=-99 

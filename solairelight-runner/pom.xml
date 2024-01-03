@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>cn.solairelight</groupId>
+    <groupId>io.github.joel-ou.solairelight</groupId>
     <artifactId>solairelight-runner</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>solairelight-runner</name>
@@ -38,7 +38,7 @@
         </dependency>
 
         <dependency>
-            <groupId>cn.solairelight</groupId>
+            <groupId>io.github.joel-ou.solairelight</groupId>
             <artifactId>solairelight-spring-boot-starter</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
@@ -52,7 +52,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.7.18</version>
                 <configuration>
-                    <mainClass>cn.solairelight.runner.Application</mainClass>
+                    <mainClass>com.github.joelou.solairelight.Application</mainClass>
                     <includeSystemScope>true</includeSystemScope>
                 </configuration>
                 <executions>
