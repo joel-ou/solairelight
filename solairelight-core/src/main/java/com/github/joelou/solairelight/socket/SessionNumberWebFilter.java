@@ -28,6 +28,10 @@ public class SessionNumberWebFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        //zero is no limit.
+        if(solairelightProperties.getSession().getMaxNumber() == 0){
+            return chain.filter(exchange);
+        }
         String method = exchange.getRequest().getMethodValue();
         String header = exchange.getRequest().getHeaders().getUpgrade();
         if((method.equals("GET") && header != null && header.equalsIgnoreCase("websocket"))) {
