@@ -3,7 +3,7 @@ server:
 
 logging:
   level:
-    com.github.joelou.solairelight.*: debug
+    io.github.joelou.solairelight.*: debug
 
 
 #SolairelightConfig example

@@ -1,4 +1,4 @@
-package com.github.joelou.solairelight.controller;
+package io.github.joelou.solairelight.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestBody;

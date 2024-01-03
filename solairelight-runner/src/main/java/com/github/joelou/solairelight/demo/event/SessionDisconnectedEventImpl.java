@@ -1,8 +1,8 @@
-package com.github.joelou.solairelight.demo.event;
+package io.github.joelou.solairelight.demo.event;
 
-import com.github.joelou.solairelight.event.EventContext;
-import com.github.joelou.solairelight.event.SessionDisconnectedEvent;
-import com.github.joelou.solairelight.session.BasicSession;
+import io.github.joelou.solairelight.event.EventContext;
+import io.github.joelou.solairelight.event.SessionDisconnectedEvent;
+import io.github.joelou.solairelight.session.BasicSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

@@ -1,8 +1,8 @@
-package com.github.joelou.solairelight.demo.event;
+package io.github.joelou.solairelight.demo.event;
 
-import com.github.joelou.solairelight.MessageWrapper;
-import com.github.joelou.solairelight.event.EventContext;
-import com.github.joelou.solairelight.event.MessageEvent;
+import io.github.joelou.solairelight.MessageWrapper;
+import io.github.joelou.solairelight.event.EventContext;
+import io.github.joelou.solairelight.event.MessageEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

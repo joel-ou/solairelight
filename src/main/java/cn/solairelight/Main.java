@@ -1,4 +1,4 @@
-package com.github.joelou.solairelight;
+package io.github.joelou.solairelight;
 
 /**
  * @author Joel Ou

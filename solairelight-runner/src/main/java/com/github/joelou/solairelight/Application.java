@@ -1,4 +1,4 @@
-package com.github.joelou.solairelight;
+package io.github.joelou.solairelight;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;

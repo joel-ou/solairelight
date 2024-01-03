@@ -1,8 +1,8 @@
-package com.github.joelou.solairelight.demo.filter;
+package io.github.joelou.solairelight.demo.filter;
 
-import com.github.joelou.solairelight.MessageWrapper;
-import com.github.joelou.solairelight.filter.FilterContext;
-import com.github.joelou.solairelight.filter.message.MessageFilter;
+import io.github.joelou.solairelight.MessageWrapper;
+import io.github.joelou.solairelight.filter.FilterContext;
+import io.github.joelou.solairelight.filter.message.MessageFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

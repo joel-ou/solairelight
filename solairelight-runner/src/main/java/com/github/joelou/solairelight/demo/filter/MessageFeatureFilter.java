@@ -1,8 +1,8 @@
-package com.github.joelou.solairelight.demo.filter;
+package io.github.joelou.solairelight.demo.filter;
 
-import com.github.joelou.solairelight.MessageWrapper;
-import com.github.joelou.solairelight.filter.FilterContext;
-import com.github.joelou.solairelight.filter.message.MessageFilter;
+import io.github.joelou.solairelight.MessageWrapper;
+import io.github.joelou.solairelight.filter.FilterContext;
+import io.github.joelou.solairelight.filter.message.MessageFilter;
 import org.springframework.boot.json.BasicJsonParser;
 import org.springframework.boot.json.JsonParser;
 import org.springframework.stereotype.Component;

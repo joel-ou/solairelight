@@ -22,7 +22,7 @@ Solairelight 是基于SpringFLux开发的WebSocket消息服务，支持单机以
 在你的项目POM文件加入依赖。
 ```xml
 <dependency>
-    <groupId>com.github.joelou.solairelight</groupId>
+    <groupId>io.github.joelou.solairelight</groupId>
     <artifactId>solairelight-spring-boot-starter</artifactId>
     <version>1.0.0-alpha</version>
 </dependency>
