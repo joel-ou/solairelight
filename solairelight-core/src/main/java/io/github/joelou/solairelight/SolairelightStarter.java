@@ -2,7 +2,6 @@ package io.github.joelou.solairelight;
 
 import io.github.joelou.solairelight.cluster.ClusterTools;
 import io.github.joelou.solairelight.cluster.NodeData;
-import io.github.joelou.solairelight.cluster.SolairelightRedisClient;
 import io.github.joelou.solairelight.event.EventFactory;
 import io.github.joelou.solairelight.event.SolairelightEvent;
 import io.github.joelou.solairelight.filter.SolairelightFilter;
@@ -12,7 +11,6 @@ import io.github.joelou.solairelight.session.SessionBroker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.Lifecycle;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
 
 import java.util.Set;
 
@@ -23,9 +21,7 @@ import java.util.Set;
 public class SolairelightStarter implements Lifecycle {
     private boolean running = false;
 
-    private final SolairelightProperties solairelightProperties;
-
-    private final ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate;
+    protected final SolairelightProperties solairelightProperties;
 
     private final Set<SolairelightFilter<?>> filters;
 
@@ -35,11 +31,9 @@ public class SolairelightStarter implements Lifecycle {
     private String port;
 
     public SolairelightStarter(SolairelightProperties solairelightProperties,
-                               ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate,
                                Set<SolairelightFilter<?>> filters,
                                Set<SolairelightEvent<?>> events) {
         this.solairelightProperties = solairelightProperties;
-        this.solairelightRedisTemplate = solairelightRedisTemplate;
         this.filters = filters;
         this.events = events;
     }
@@ -49,11 +43,7 @@ public class SolairelightStarter implements Lifecycle {
         //init properties
         ClusterTools.initNodeId(solairelightProperties.getCluster().getNodeIdSuffix());
         NodeData.instance.getBasicInfo().setPort(port);
-        if(solairelightProperties.getSession().getMaxNumber()>0)
-            NodeData.instance.getSessionNumber().set(solairelightProperties.getSession().getMaxNumber());
-        //cluster node register.
-        if(solairelightProperties.getCluster().isEnable())
-            SolairelightRedisClient.init(solairelightRedisTemplate).nodeRegister();
+        NodeData.instance.getSessionNumber().set(solairelightProperties.getSession().getMaxNumber());
         //init components
         SessionBroker.init(solairelightProperties);
         FilterFactory.init(this.filters);
@@ -66,8 +56,6 @@ public class SolairelightStarter implements Lifecycle {
 
     @Override
     public void stop() {
-        if(SolairelightRedisClient.getInstance() != null)
-            SolairelightRedisClient.getInstance().nodeUnregister();
         this.running = false;
     }
 

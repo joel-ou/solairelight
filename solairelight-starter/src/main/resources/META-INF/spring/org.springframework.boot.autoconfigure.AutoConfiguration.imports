@@ -1,1 +1,2 @@
-io.github.joelou.solairelight.autoconfig.SolairelightAutoConfig
+io.github.joelou.solairelight.autoconfig.ClusterSolairelightAutoConfig
+io.github.joelou.solairelight.autoconfig.StandaloneSolairelightAutoConfig
