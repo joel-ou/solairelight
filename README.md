@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-Solairelight 是基于SpringFLux开发的WebSocket消息服务，支持单机以及集群部署（集群需要Redis）。
+Solairelight 是基于SpringWebFlux开发的WebSocket消息服务，支持单机以及集群部署（集群需要Redis）。
 
 ## 主要功能
 
