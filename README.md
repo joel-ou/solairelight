@@ -29,7 +29,16 @@ Solairelight 是基于SpringFLux开发的WebSocket消息服务，支持单机以
 ```
 项目需要二次开发，类似于Spring-Gateway，你可以在已有的项目引入依赖，或者新开项目并引入依赖。
 </br>可参考Solairelight-runner。
-
+<br>
+<br>如果需要集群运行，则需要额外加入spring-boot-starter-data-redis依赖
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+    <version>2.7.18</version>
+    <scope>compile</scope>
+</dependency>
+```
 
 ## 演示 Demo
 
