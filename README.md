@@ -178,6 +178,7 @@ Channel：固定为Websocket
 ```
 
 ## 用户会话连接规范
+* 默认的连接路径是/solairelight，例如：ws://127.0.0.1:8081/solairelight
 * Web端因为无法支持自定义的Header，可将自定义的Header信息通过URL参数传入。
 * 所有的Session建立连接时候都需要携带一个Token（JWT）Header，用于标识该Session所属范围，以及用户特征。
 * 该Token的KEY为Metadata-Token，KEY Name可自定义。
