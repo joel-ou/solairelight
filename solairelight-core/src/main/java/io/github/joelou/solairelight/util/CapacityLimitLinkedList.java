@@ -1,50 +1,54 @@
 package io.github.joelou.solairelight.util;
 
-import jdk.internal.misc.Unsafe;
-import reactor.core.publisher.Mono;
 
+import lombok.Getter;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+import sun.misc.Unsafe;
+
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Joel Ou
  */
 public class CapacityLimitLinkedList<T> {
 
+    @Getter
     private final LinkedList<T> list = new LinkedList<>();
 
     private final int capacity;
 
-    private static final Unsafe U = Unsafe.getUnsafe();
-    private static final long STATE
-            = U.objectFieldOffset(CapacityLimitLinkedList.class, "state");
-
-    private volatile int state;
+    private final AtomicInteger state = new AtomicInteger(0);
 
     private volatile Thread holder;
 
+    private volatile long duration;
+
     public CapacityLimitLinkedList(int capacity) {
         this.capacity = capacity;
-        this.state = 0;
     }
 
     public void add(T t) {
-        trySqueezeOut();
         for (; ;) {
-            boolean acquired = compareAndSetState(0, 1);
+            boolean acquired = state.compareAndSet(0, 1);
             if(!acquired) {
-                if (holder != null && !holder.isAlive()) {
-                    //restore state
-                    compareAndSetState(1, 0);
-                }
                 continue;
             }
-            holder = Thread.currentThread();
-            //recheck list size.
-            trySqueezeOut();
-            //add element
-            list.addFirst(t);
-            //release
-            state = 0;
+            try {
+                duration = System.currentTimeMillis();
+                holder = Thread.currentThread();
+                //check list size.
+                trySqueezeOut();
+                //add element
+                list.addFirst(t);
+                //release
+            } finally {
+                //restore state.
+                state.set(0);
+            }
             return;
         }
     }
@@ -61,9 +65,5 @@ public class CapacityLimitLinkedList<T> {
         if(capacity == list.size()) {
             list.removeLast();
         }
-    }
-
-    private boolean compareAndSetState(int expect, int update){
-        return U.compareAndSetInt(this, STATE, 0, 1);
     }
 }
