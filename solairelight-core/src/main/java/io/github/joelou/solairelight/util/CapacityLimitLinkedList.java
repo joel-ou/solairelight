@@ -8,7 +8,7 @@ import java.util.LinkedList;
 /**
  * @author Joel Ou
  */
-public class ReactiveLinkedList<T> {
+public class CapacityLimitLinkedList<T> {
 
     private final LinkedList<T> list = new LinkedList<>();
 
@@ -16,13 +16,13 @@ public class ReactiveLinkedList<T> {
 
     private static final Unsafe U = Unsafe.getUnsafe();
     private static final long STATE
-            = U.objectFieldOffset(ReactiveLinkedList.class, "state");
+            = U.objectFieldOffset(CapacityLimitLinkedList.class, "state");
 
     private volatile int state;
 
     private volatile Thread holder;
 
-    public ReactiveLinkedList(int capacity) {
+    public CapacityLimitLinkedList(int capacity) {
         this.capacity = capacity;
         this.state = 0;
     }

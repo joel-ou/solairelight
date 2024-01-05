@@ -1,6 +1,6 @@
 package io.github.joelou.solairelight.brodcast;
 
-import io.github.joelou.solairelight.util.ReactiveLinkedList;
+import io.github.joelou.solairelight.util.CapacityLimitLinkedList;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -9,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class AbstractBroadcaster implements Broadcaster {
 
-    private final ReactiveLinkedList<String> duplication;
+    private final CapacityLimitLinkedList<String> duplication;
 
     {
-        duplication = new ReactiveLinkedList<>(1000);
+        duplication = new CapacityLimitLinkedList<>(1000);
     }
 
     public void cache(String id){
