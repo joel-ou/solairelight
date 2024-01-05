@@ -24,7 +24,7 @@ Solairelight 是基于SpringWebFlux开发的WebSocket消息服务，支持单机
 <dependency>
     <groupId>io.github.joelou.solairelight</groupId>
     <artifactId>solairelight-spring-boot-starter</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.1-alpha</version>
 </dependency>
 ```
 项目需要二次开发，类似于Spring-Gateway，你可以在已有的项目引入依赖，或者新开项目并引入依赖。
