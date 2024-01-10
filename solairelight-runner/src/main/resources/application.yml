@@ -18,7 +18,7 @@ solairelight:
     public-key-base64: MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==
   session:
     idle: 600 #seconds
-    max-number: 1
+    max-number: 20000
   forward:
     enable: true
     forwardHeader: Host

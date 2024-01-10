@@ -50,12 +50,14 @@ public class SessionNumberWebFilter implements WebFilter {
     }
 
     private Mono<Void> redirect(ServerWebExchange serverWebExchange){
+        //check whether none-cluster.
         if(!solairelightProperties.getCluster().isEnable()){
             log.error("the number of sessions exceeded. cur {} max {}",
                     NodeData.instance.getSessionNumber().get(),
                     solairelightProperties.getSession().getMaxNumber());
             return Mono.empty();
         }
+        //get nodes of cluster to redirect.
         SolairelightRedisClient.getInstance().getNodeCache()
                 .stream()
                 .max(Comparator.comparingInt(obj -> obj.getSessionNumber().get()))
