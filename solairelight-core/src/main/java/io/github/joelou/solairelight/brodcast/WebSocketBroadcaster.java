@@ -2,18 +2,24 @@ package io.github.joelou.solairelight.brodcast;
 
 import io.github.joelou.solairelight.cluster.BroadcastDistributor;
 import io.github.joelou.solairelight.cluster.ClusterTools;
+import io.github.joelou.solairelight.cluster.DistributeResult;
+import io.github.joelou.solairelight.cluster.NodeData;
 import io.github.joelou.solairelight.exception.DuplicatedBroadcastException;
 import io.github.joelou.solairelight.exception.NoSessionFoundException;
+import io.github.joelou.solairelight.exception.ResponseMessageException;
 import io.github.joelou.solairelight.properties.SolairelightProperties;
 import io.github.joelou.solairelight.session.BasicSession;
 import io.github.joelou.solairelight.session.SessionFinder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Joel Ou
@@ -34,38 +40,32 @@ public class WebSocketBroadcaster extends AbstractBroadcaster {
     private BroadcastSender broadcastSender;
 
     @Override
-    public boolean broadcast(BroadcastParam broadcastParam) {
-        boolean clusterEnable = solairelightProperties.getCluster().isEnable();
-        if(clusterEnable)
-            broadcastDistributor.distributeAllNode(broadcastParam).subscribe();
+    public Flux<DistributeResult> broadcast(BroadcastParam broadcastParam) {
+        Flux<DistributeResult> clusterResult = broadcastDistributor.distributeAllNode(broadcastParam);
+        Mono<DistributeResult> localResult;
         try {
             if(broadcastParam.getRange().equals("*")){
-                localBroadcast(null, broadcastParam);
+                localResult = localBroadcast(null, broadcastParam);
             } else {
                 LinkedList<String[]> exprList = parseRange(broadcastParam.getRange());
-                localBroadcast(exprList, broadcastParam);
+                localResult = localBroadcast(exprList, broadcastParam);
             }
-        } catch (NoSessionFoundException e) {
-            if(!clusterEnable){
-                throw e;
-            }
+        } catch (ResponseMessageException e) {
+            localResult = Mono.just(DistributeResult.failure(NodeData.instance.getBasicInfo(), e));
         }
-        return true;
+        return clusterResult.concatWith(localResult);
     }
 
     @Override
-    public void localBroadcast(BroadcastParam broadcastParam){
+    public Mono<DistributeResult> localBroadcast(BroadcastParam broadcastParam){
         LinkedList<String[]> exprList = parseRange(broadcastParam.getRange());
-        localBroadcast(exprList, broadcastParam);
+        return localBroadcast(exprList, broadcastParam);
     }
 
     @Override
-    public void localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam){
+    public Mono<DistributeResult> localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam){
         if(super.duplicated(broadcastParam.getId())){
             log.info("duplicated broadcast {}", broadcastParam);
-            if(solairelightProperties.getCluster().isEnable()) {
-                return;
-            }
             throw new DuplicatedBroadcastException();
         }
         Collection<BasicSession> sessions = sessionFinder.finding(exprList,
@@ -81,6 +81,7 @@ public class WebSocketBroadcaster extends AbstractBroadcaster {
             super.cache(broadcastParam.getId());
         }
         log.info("broadcast success {} matched", sessions.size());
+        return Mono.just(DistributeResult.success(NodeData.instance.getBasicInfo()));
     }
 
     private LinkedList<String[]> parseRange(String range){

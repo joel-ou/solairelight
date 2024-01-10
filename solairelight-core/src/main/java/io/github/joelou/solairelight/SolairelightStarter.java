@@ -41,6 +41,8 @@ public class SolairelightStarter implements Lifecycle {
     @Override
     public void start() {
         //init properties
+        SolairelightSettings.setCluster(solairelightProperties.getCluster().isEnable());
+        SolairelightSettings.setNodeIdSuffix(solairelightProperties.getCluster().getNodeIdSuffix());
         ClusterTools.initNodeId(solairelightProperties.getCluster().getNodeIdSuffix());
         NodeData.instance.getBasicInfo().setPort(port);
         NodeData.instance.getSessionNumber().set(solairelightProperties.getSession().getMaxNumber());
@@ -51,7 +53,7 @@ public class SolairelightStarter implements Lifecycle {
         //after finished
         this.running = true;
         log.info("solairelight started on path {} mode: {}", solairelightProperties.getWebSocketPath(),
-                solairelightProperties.getCluster().isEnable()?"cluster":"standalone");
+                SolairelightSettings.isCluster()?"cluster":"standalone");
     }
 
     @Override

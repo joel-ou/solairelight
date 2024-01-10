@@ -1,6 +1,8 @@
 package io.github.joelou.solairelight.brodcast;
 
 import io.github.joelou.solairelight.MessageWrapper;
+import io.github.joelou.solairelight.cluster.DistributeResult;
+import io.github.joelou.solairelight.cluster.NodeData;
 import io.github.joelou.solairelight.exception.ExceptionEnum;
 import io.github.joelou.solairelight.exception.ResponseMessageException;
 import io.github.joelou.solairelight.filter.FilterContext;
@@ -20,29 +22,10 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class BroadcastRequestFunctionHandler {
 
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    public static class HttpResponse {
-
-        private boolean success = true;
-
-        private String code = "success";
-
-        private String message = "success";
-
-        public static HttpResponse success(){
-            return new HttpResponse();
-        }
-
-        public static HttpResponse failure(String code, String message){
-            return new HttpResponse(false, code, message);
-        }
-    }
-
     public static RouterFunction<ServerResponse> broadcast(BroadcastService broadcastService){
         return RouterFunctions.route().POST("solairelight/broadcast", request -> {
             Mono<BroadcastParam> broadcastParam = request.bodyToMono(BroadcastParam.class);
+            BroadcastHttpResponse response = new BroadcastHttpResponse();
             return broadcastParam
                     .handle((param, sink)->{
                         MessageWrapper mw = MessageWrapper.create(param);
@@ -54,18 +37,14 @@ public class BroadcastRequestFunctionHandler {
                         }
                     })
                     .map(obj->((MessageWrapper)obj).getMessage())
-                    .doOnNext(message->{
-                        broadcastService.broadcast((BroadcastParam) message);
-                    })
-                    .map(bol->HttpResponse.success())
-                    .flatMap(response->ServerResponse.ok().bodyValue(response))
-                    .onErrorResume(ResponseMessageException.class, e->{
-                        log.error("broadcast failed {}", e.getMessage());
-                        return ServerResponse.badRequest().bodyValue(HttpResponse.failure(e.getCode(), e.getMessage()));
-                    }).onErrorResume(Exception.class, e->{
-                        log.error("broadcast failed", e);
-                        return ServerResponse.badRequest().bodyValue(HttpResponse.failure("e00", "unknown error"));
-                    });
+                    //do broadcast.
+                    .flatMapMany(message-> broadcastService.broadcast((BroadcastParam) message))
+                    .doOnNext(response::add)
+                    .last()
+                    .map(x->response)
+                    .doOnError(e-> log.error("unexpected broadcast failed.", e))
+                    .onErrorReturn(BroadcastHttpResponse.failure("unexpected broadcast failed."))
+                    .flatMap(x->ServerResponse.ok().bodyValue(x));
         }).build();
     }
 
@@ -74,14 +53,14 @@ public class BroadcastRequestFunctionHandler {
             Mono<BroadcastParam> broadcastParam = request.bodyToMono(BroadcastParam.class);
             return broadcastParam
                     .doOnNext(broadcastService::distributorEntrance)
-                    .map(bol->HttpResponse.success())
+                    .map(bol-> DistributeResult.success(NodeData.instance.getBasicInfo()))
                     .flatMap(response->ServerResponse.ok().bodyValue(response))
                     .onErrorResume(ResponseMessageException.class, e->{
                         log.error("broadcast failed {}", e.getMessage());
-                        return ServerResponse.ok().bodyValue(HttpResponse.failure(e.getCode(), e.getMessage()));
+                        return ServerResponse.ok().bodyValue(DistributeResult.failure(e.getCode(), e.getMessage()));
                     }).onErrorResume(Exception.class, e->{
                         log.error("broadcast failed", e);
-                        return ServerResponse.badRequest().bodyValue(HttpResponse.failure("e00", "unknown error"));
+                        return ServerResponse.badRequest().bodyValue(DistributeResult.failure("e00", "unknown error"));
                     });
         }).build();
     }

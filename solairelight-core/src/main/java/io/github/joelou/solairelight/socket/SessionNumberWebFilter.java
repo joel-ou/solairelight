@@ -1,5 +1,6 @@
 package io.github.joelou.solairelight.socket;
 
+import io.github.joelou.solairelight.SolairelightSettings;
 import io.github.joelou.solairelight.cluster.NodeData;
 import io.github.joelou.solairelight.cluster.SolairelightRedisClient;
 import io.github.joelou.solairelight.properties.SolairelightProperties;
@@ -51,7 +52,7 @@ public class SessionNumberWebFilter implements WebFilter {
 
     private Mono<Void> redirect(ServerWebExchange serverWebExchange){
         //check whether none-cluster.
-        if(!solairelightProperties.getCluster().isEnable()){
+        if(!SolairelightSettings.isCluster()){
             log.error("the number of sessions exceeded. cur {} max {}",
                     NodeData.instance.getSessionNumber().get(),
                     solairelightProperties.getSession().getMaxNumber());

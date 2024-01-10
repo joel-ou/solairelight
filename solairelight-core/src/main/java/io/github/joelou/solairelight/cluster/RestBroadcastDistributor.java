@@ -1,6 +1,9 @@
 package io.github.joelou.solairelight.cluster;
 
 import io.github.joelou.solairelight.brodcast.BroadcastParam;
+import io.github.joelou.solairelight.exception.ExceptionEnum;
+import io.netty.channel.ConnectTimeoutException;
+import io.netty.handler.timeout.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -9,6 +12,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
 
+import java.net.ConnectException;
 import java.time.Duration;
 
 /**
@@ -40,10 +44,19 @@ public class RestBroadcastDistributor implements BroadcastDistributor {
         uri = String.format("%s/solairelight/distributor/entrance", uri);
         return DistributeWebClient
                 .post(uri, broadcastParam)
-                .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)))
-                .map(o->new DistributeResult(basicInfo.getNodeId(), o.getStatusCode()))
-                .doOnSuccess(result->{
-                    log.info("distribute done node {} and result {}", basicInfo, result);
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)).filter(e->e instanceof ConnectException))
+                .map(response->{
+                    if(response.getStatusCode().is2xxSuccessful()) {
+                        log.info("distribute done node {} and result: {}", basicInfo, response);
+                        return response.getBody();
+                    } else {
+                        log.error("distribute done node {} and result: {}", basicInfo, "http request failed");
+                        return DistributeResult.failure(basicInfo, ExceptionEnum.DISTRIBUTE_FAILED_HTTP);
+                    }
+                })
+                .onErrorResume((e)-> {
+                    log.error("error occurred when distribute to node {}.", basicInfo);
+                    return Mono.just(DistributeResult.failure(basicInfo, "distribute failed."));
                 });
     }
 }
