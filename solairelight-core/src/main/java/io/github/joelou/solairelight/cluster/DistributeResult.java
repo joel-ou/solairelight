@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class DistributeResult {
     private String nodeId;
 
