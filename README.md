@@ -231,6 +231,6 @@ solairelight:
 集群节点ID后缀可以通过添加JAVA的执行参数设置 java -Dsolairelight.cluster.nodeIdSuffix=-99 
 
 ## 后续版本展望
-* 优化集群下的广播结果返回
+* 提供监控信息端点
 * 优化日志输出
 * 优化会话索引存储
