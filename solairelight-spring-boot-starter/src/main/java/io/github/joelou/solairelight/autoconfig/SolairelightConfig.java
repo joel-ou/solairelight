@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -29,9 +30,9 @@ import java.util.Map;
 public class SolairelightConfig {
 
     @Bean
+    @DependsOn("solairelightStarter")
     public HandlerMapping handlerMapping(SolairelightProperties properties,
-                                         SolairelightWebSocketHandler solairelightWebSocketHandler,
-                                         SolairelightStarter solairelightStarter) {
+                                         SolairelightWebSocketHandler solairelightWebSocketHandler) {
         Map<String, WebSocketHandler> map = new HashMap<>();
         map.put(properties.getWebSocketPath(), solairelightWebSocketHandler);
         int order = -1; // before annotated controllers

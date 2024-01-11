@@ -36,8 +36,8 @@ import java.util.Set;
 public class ClusterSolairelightAutoConfig {
 
     @Bean
-    public SolairelightStarter solairelightRegister(SolairelightProperties solairelightProperties,
-                                                    @Autowired(required = false) ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate,
+    public SolairelightStarter solairelightStarter(SolairelightProperties solairelightProperties,
+                                                    ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate,
                                                     Set<SolairelightFilter<?>> filters,
                                                     Set<SolairelightEvent<?>> events){
         return new ClusterSolairelightStarter(solairelightProperties, solairelightRedisTemplate,

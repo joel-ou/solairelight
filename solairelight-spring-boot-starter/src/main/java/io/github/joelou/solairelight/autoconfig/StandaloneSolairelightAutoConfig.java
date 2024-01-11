@@ -20,7 +20,7 @@ import java.util.Set;
 public class StandaloneSolairelightAutoConfig {
 
     @Bean
-    public SolairelightStarter solairelightRegister(SolairelightProperties solairelightProperties,
+    public SolairelightStarter solairelightStarter(SolairelightProperties solairelightProperties,
                                                     Set<SolairelightFilter<?>> filters,
                                                     Set<SolairelightEvent<?>> events){
         return new SolairelightStarter(solairelightProperties,

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.joel-ou.solairelight</groupId>
     <artifactId>solairelight-core</artifactId>
-    <version>1.0.1-alpha</version>
+    <version>1.0.2-alpha</version>
     <name>solairelight-core</name>
     <description>a reactive WebSocket communication service based on Spring-WebFlux. 基于Spring-WebFlux开发的响应式WebSocket通讯服务。</description>
     <packaging>jar</packaging>
