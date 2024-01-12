@@ -40,7 +40,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         }
 
         //get receiver
-        Flux<MessageWrapper> receiver = handleReceive(sessionExpand, session.receive());
+        Flux<?> receiver = handleReceive(sessionExpand, session.receive());
         //create message flux for client
         Flux<WebSocketMessage> sender = Flux.create(sessionExpand::setSink);
         handleSender(sessionExpand, sender);
@@ -63,10 +63,11 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
                 .then();
     }
 
-    private Flux<MessageWrapper> handleReceive(WebSocketSessionExpand sessionExpand,
+    private Flux<?> handleReceive(WebSocketSessionExpand sessionExpand,
                                                  Flux<WebSocketMessage> receiver){
         EventTrigger eventTrigger = EventFactory.getTrigger(EventTrigger.TriggerAction.MESSAGE);
         return receiver
+                .limitRate(10, 5)
                 .handle((message, sink)->{
                     message.retain();
                     log.debug("receive message from client, message: {}", message.getPayloadAsText());
@@ -79,6 +80,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
                         message.release();
                     }
                 })
+                .checkpoint("filter phase")
                 .map(obj->(MessageWrapper)obj)
                 .doOnNext(message->{
                     //do forward
@@ -88,7 +90,8 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
                             .call(message)
                             .doFinally(s->((WebSocketMessage) message.getRawMessage()).release()).subscribe();
                 })
-                .onErrorComplete()
+                .concatMap(messageWrapper -> forwardService.forward(sessionExpand, messageWrapper))
+                .checkpoint("forward phase")
                 .doOnError(error-> log.error("receiving message error occurred ", error));
     }
 

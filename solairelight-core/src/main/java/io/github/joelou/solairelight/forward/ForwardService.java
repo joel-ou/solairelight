@@ -19,6 +19,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.WebSocketMessage;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
 import java.net.URI;
@@ -41,33 +42,34 @@ public class ForwardService {
         ClusterTools.getLocalIPAddress();
     }
 
-    public void forward(BasicSession basicSession, MessageWrapper message){
+    public Mono<?> forward(BasicSession basicSession, MessageWrapper message){
         if(!message.isForwardable() || message.getFeatures() == null) {
             log.debug("message is not forwardable. {}", message);
-            return;
+            return Mono.empty();
         }
         try {
             if (!solairelightProperties.getForward().isEnable()) {
                 log.debug("forward not enabled.");
-                return;
+                return Mono.empty();
             }
             Object messageObj = message.getMessage();
             String uri = routing(basicSession, message.getFeatures());
             if (uri == null) {
                 log.warn("no route matched. message: {}  config: {}", message.getMessage(), solairelightProperties.getForward());
-                return;
+                return Mono.empty();
             }
-            ForwardWebClient
+            return ForwardWebClient
                     .post(URI.create(uri), messageObj, headerHandle(basicSession))
                     .doOnNext(response -> {
                         log.debug("forwarded response, status {} body {}", response.getStatusCode(), response.getBody());
-                    }).subscribe();
+                    });
         } catch (JsonParseException jsonError) {
             log.error("json parse error.", jsonError);
         } catch (Exception e) {
             //catch all exception for avoid the flux stream abort
             log.error("forward error occurred. message: {}  config: {}", message.getMessage(), solairelightProperties.getForward(), e);
         }
+        return Mono.empty();
     }
 
     @Nullable
