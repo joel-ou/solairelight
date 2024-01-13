@@ -67,7 +67,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
                                                  Flux<WebSocketMessage> receiver){
         EventTrigger eventTrigger = EventFactory.getTrigger(EventTrigger.TriggerAction.MESSAGE);
         return receiver
-                .limitRate(10, 5)
+                .limitRate(1)
                 .handle((message, sink)->{
                     message.retain();
                     log.debug("receive message from client, message: {}", message.getPayloadAsText());
