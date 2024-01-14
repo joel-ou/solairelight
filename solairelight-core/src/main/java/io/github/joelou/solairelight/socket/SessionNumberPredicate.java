@@ -13,6 +13,7 @@ import java.util.function.BiPredicate;
 /**
  * @author Joel Ou
  */
+@Deprecated
 public class SessionNumberPredicate implements BiPredicate<Object, ServerWebExchange> {
 
     @Override

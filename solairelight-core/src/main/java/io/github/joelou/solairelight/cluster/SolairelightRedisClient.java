@@ -36,8 +36,6 @@ public class SolairelightRedisClient {
 
     private boolean running = false;
 
-    private volatile List<NodeData> nodeDataCache = Collections.emptyList();
-
     private SolairelightRedisClient(){}
 
     public static synchronized SolairelightRedisClient init(ReactiveRedisTemplate<Object, Object> redisTemplate){
@@ -98,7 +96,11 @@ public class SolairelightRedisClient {
     }
 
     public List<NodeData> getNodeCache(){
-        return nodeDataCache;
+        return NodeDataCacheStorage.getCache();
+    }
+
+    public Flux<NodeData> getNodeCacheFlux(){
+        return Flux.fromIterable(NodeDataCacheStorage.getCache());
     }
 
     public Flux<NodeData> getNodes(){
@@ -148,12 +150,14 @@ public class SolairelightRedisClient {
                     throw new RuntimeException(e);
                 }
                 if(!running) return;
+                //record heartbeat datetime-nano.
+                NodeData.instance.setLastHeartbeat(System.nanoTime());
                 //do re-register for update node data.
                 nodeRegister(true);
                 //refresh node cache.
                 getNodes(true)
                         .filter(nodeData -> !nodeData.getBasicInfo().getNodeId().equals(NODE_INFO.getNodeId()))
-                        .collectList().subscribe(list->nodeDataCache=list);
+                        .subscribe(NodeDataCacheStorage::add);
             }
         });
         heartbeat.setName("Solairelight-Heartbeat-Thread"+ClusterTools.getNodeId());

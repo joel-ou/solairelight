@@ -2,8 +2,6 @@ package io.github.joelou.solairelight.cluster;
 
 import io.github.joelou.solairelight.brodcast.BroadcastParam;
 import io.github.joelou.solairelight.exception.ExceptionEnum;
-import io.netty.channel.ConnectTimeoutException;
-import io.netty.handler.timeout.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -33,7 +31,7 @@ public class RestBroadcastDistributor implements BroadcastDistributor {
     public Flux<DistributeResult> distributeAllNode(BroadcastParam broadcastParam) {
         return SolairelightRedisClient
                 .getInstance()
-                .getNodes()
+                .getNodeCacheFlux()
                 .filter(nodeData -> !nodeData.getBasicInfo().getNodeId().equals(ClusterTools.getNodeId()))
                 .flatMap(nodeData -> post(broadcastParam, nodeData.getBasicInfo()));
     }
@@ -55,6 +53,7 @@ public class RestBroadcastDistributor implements BroadcastDistributor {
                     }
                 })
                 .onErrorResume((e)-> {
+                    NodeDataCacheStorage.failed(basicInfo);
                     log.error("error occurred when distribute to node {}.", basicInfo);
                     return Mono.just(DistributeResult.failure(basicInfo, "distribute failed."));
                 });

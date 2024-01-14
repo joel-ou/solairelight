@@ -20,7 +20,7 @@ import java.time.Duration;
  * @author Joel Ou
  */
 @Slf4j
-public class DistributeWebClient {
+class DistributeWebClient {
     private static final WebClient webClient;
 
     static {

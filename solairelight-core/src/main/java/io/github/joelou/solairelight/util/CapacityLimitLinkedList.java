@@ -44,7 +44,6 @@ public class CapacityLimitLinkedList<T> {
                 trySqueezeOut();
                 //add element
                 list.addFirst(t);
-                //release
             } finally {
                 //restore state.
                 state.set(0);

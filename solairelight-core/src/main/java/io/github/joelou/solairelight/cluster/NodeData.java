@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,6 +29,8 @@ public class NodeData implements Serializable{
 
     private final AtomicInteger sessionNumber = new AtomicInteger();
 
+    protected long lastHeartbeat = 0L;
+
     public final static NodeData instance = new NodeData();
 
     private NodeData(){}
@@ -42,14 +45,13 @@ public class NodeData implements Serializable{
         @Setter
         private String ipAddress = ClusterTools.getLocalIPAddress();
 
-        @Getter
         @Setter
         private String port;
 
         private final String nodeId = ClusterTools.getNodeId();
 
-        //1 normal 2 loss 3 failure
-        private final int status = 1;
+        //1 normal 2 unhealthy 3 failed
+        private final AtomicInteger status = new AtomicInteger(1);
 
         private long version;
 
@@ -67,6 +69,18 @@ public class NodeData implements Serializable{
             uri = String.format("http://%s:%s", uri, getPort());
             return uri;
         }
+
+        AtomicInteger getStatus() {
+            return status;
+        }
+    }
+
+    long getLastHeartbeat() {
+        return lastHeartbeat;
+    }
+
+    void setLastHeartbeat(long nano) {
+        lastHeartbeat = nano;
     }
 
     public NodeData addID(String id){
@@ -86,11 +100,16 @@ public class NodeData implements Serializable{
     public boolean equals(Object o) {
         if(super.equals(o)) return true;
         if(o instanceof NodeData){
-            return ((NodeData) o).getBasicInfo().nodeId.equals(this.basicInfo.getNodeId());
+            return ((NodeData) o).getBasicInfo().getNodeId().equals(this.basicInfo.getNodeId());
         } else if (o instanceof BasicInfo){
-            return ((BasicInfo) o).nodeId.equals(this.basicInfo.getNodeId());
+            return ((BasicInfo) o).getNodeId().equals(this.basicInfo.getNodeId());
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(basicInfo.nodeId);
     }
 
     private byte[] toBytes(Object object){
