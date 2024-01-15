@@ -45,6 +45,7 @@ public class RestBroadcastDistributor implements BroadcastDistributor {
                 .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)).filter(e->e instanceof ConnectException))
                 .map(response->{
                     if(response.getStatusCode().is2xxSuccessful()) {
+                        NodeDataCacheStorage.recover(basicInfo);
                         log.info("distribute done node {} and result: {}", basicInfo, response);
                         return response.getBody();
                     } else {

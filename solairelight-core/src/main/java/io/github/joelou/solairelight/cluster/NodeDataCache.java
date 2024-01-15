@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -25,12 +26,19 @@ public class NodeDataCache {
 
     private final AtomicInteger failedTimes = new AtomicInteger(0);
 
+    private long timestamp = 0L;
+
     public NodeDataCache(NodeData nodeData) {
         this.nodeData = nodeData;
     }
 
     public void failed(){
-        failedTimes.incrementAndGet();
+        if(timestamp > 0 && (System.currentTimeMillis()-timestamp) > Duration.ofMinutes(5).toMillis()) {
+            failedTimes.set(1);
+        } else {
+            timestamp = System.currentTimeMillis();
+            failedTimes.incrementAndGet();
+        }
     }
 
     public int failedTimes(){

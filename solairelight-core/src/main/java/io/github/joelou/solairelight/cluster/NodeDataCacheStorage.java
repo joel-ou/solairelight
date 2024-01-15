@@ -1,6 +1,8 @@
 package io.github.joelou.solairelight.cluster;
 
+import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -11,29 +13,43 @@ class NodeDataCacheStorage {
 
     public static boolean add(NodeData nodeData) {
         Optional<NodeDataCache> nd;
+        NodeDataCache cache = new NodeDataCache(nodeData);
         if((nd = find(nodeData)).isPresent()) {
             int status = nd.get().getNodeData().getBasicInfo().getStatus().intValue();
             //keep the status of the cached node.
-            if(status == 3) {
+            if(status == 3 && nodeData.getVersion() > 0) {
                 nodeData.getBasicInfo().getStatus().set(status);
             }
+            nodeDataCache.remove(cache);
         }
-        return nodeDataCache.add(new NodeDataCache(nodeData));
+        return nodeDataCache.add(cache);
     }
 
 
     public static List<NodeData> getCache(){
         long cur = System.currentTimeMillis();
-        return nodeDataCache.stream()
+        AtomicReference<NodeDataCache> del = new AtomicReference<>();
+        List<NodeData> result = nodeDataCache.stream()
                 .filter(cache->{
-                    if(cur-cache.getNodeData().getLastHeartbeat()<=5000) {
+                    int status = cache.getNodeData().getBasicInfo().getStatus().intValue();
+                    long lastHeartbeat;
+                    if((lastHeartbeat = cache.getNodeData().getVersion()) != 0
+                            && cur- lastHeartbeat>= Duration.ofSeconds(5).toMinutes()
+                            && status == 1) {
                         status(cache.getNodeData().getBasicInfo(), 1, 2);
+                    }
+                    //delete the node after 10 minutes exceeded.
+                    if((cur - lastHeartbeat) > Duration.ofMinutes(1).toMinutes()
+                            && status == 3){
+                        del.set(cache);
                         return false;
                     }
-                    return cache.getNodeData().getBasicInfo().getStatus().intValue() != 3;
+                    return status != 3;
                 })
                 .map(NodeDataCache::getNodeData)
                 .collect(Collectors.toList());
+        nodeDataCache.remove(del.get());
+        return result;
     }
 
     public static void unhealthy(NodeData nodeData){
@@ -56,6 +72,11 @@ class NodeDataCacheStorage {
                 n.failed();
             }
         });
+    }
+
+    public static void recover(NodeData.BasicInfo basicInfo) {
+        if(basicInfo.getStatus().intValue() == 3)
+            status(basicInfo, 3, 2);
     }
 
     private static void status(NodeData.BasicInfo basicInfo, int expect, int newVal) {

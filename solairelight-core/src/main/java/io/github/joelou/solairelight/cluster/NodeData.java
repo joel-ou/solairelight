@@ -23,13 +23,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NodeData implements Serializable{
     private static final long serialVersionUID = 1L;
 
-    private final Set<String> ids = new HashSet<>();
+    private transient final Set<String> ids = new HashSet<>();
 
     private final BasicInfo basicInfo = new BasicInfo();
 
     private final AtomicInteger sessionNumber = new AtomicInteger();
 
-    protected long lastHeartbeat = 0L;
+    private long version;
 
     public final static NodeData instance = new NodeData();
 
@@ -42,8 +42,7 @@ public class NodeData implements Serializable{
 
         private BasicInfo(){}
 
-        @Setter
-        private String ipAddress = ClusterTools.getLocalIPAddress();
+        private final String ipAddress = ClusterTools.getLocalIPAddress();
 
         @Setter
         private String port;
@@ -53,16 +52,11 @@ public class NodeData implements Serializable{
         //1 normal 2 unhealthy 3 failed
         private final AtomicInteger status = new AtomicInteger(1);
 
-        private long version;
-
         @Override
         public int hashCode() {
             return nodeId.hashCode();
         }
 
-        public void updateVersion(){
-            this.version = System.currentTimeMillis();
-        }
 
         public String getUrl(){
             String uri = getIpAddress();
@@ -75,12 +69,8 @@ public class NodeData implements Serializable{
         }
     }
 
-    long getLastHeartbeat() {
-        return lastHeartbeat;
-    }
-
-    void setLastHeartbeat(long nano) {
-        lastHeartbeat = nano;
+    void updateVersion(){
+        this.version = System.currentTimeMillis();
     }
 
     public NodeData addID(String id){

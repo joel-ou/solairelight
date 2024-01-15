@@ -54,7 +54,6 @@ public class SolairelightRedisClient {
     public void nodeRegister(boolean reRegister){
         running = true;
         nodeId = NODE_INFO.getNodeId();
-        NODE_INFO.updateVersion();
         String msgPrefix = buildMsg(NODE_INFO);
         Mono<Boolean> mono = redisTemplate
                 .opsForValue()
@@ -145,13 +144,12 @@ public class SolairelightRedisClient {
         Thread heartbeat = new Thread(()->{
             while (running) {
                 try {
-                    Thread.sleep(3000L);
+                    Thread.sleep(1000L);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 if(!running) return;
-                //record heartbeat datetime-nano.
-                NodeData.instance.setLastHeartbeat(System.nanoTime());
+                NodeData.instance.updateVersion();
                 //do re-register for update node data.
                 nodeRegister(true);
                 //refresh node cache.

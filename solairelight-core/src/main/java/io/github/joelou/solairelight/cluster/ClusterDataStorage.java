@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 /**
  * @author Joel Ou
  */
+@Deprecated
 public class ClusterDataStorage {
     @Getter
     private final Set<NodeData> nodeData = new HashSet<>();
@@ -43,7 +44,7 @@ public class ClusterDataStorage {
         for (NodeData data : this.nodeData) {
             if(data.equals(basicInfo)) {
                 synchronized (basicInfoLocker) {
-                    data.getBasicInfo().setIpAddress(basicInfo.getIpAddress());
+//                    data.getBasicInfo().setIpAddress(basicInfo.getIpAddress());
                 }
                 return;
             }
