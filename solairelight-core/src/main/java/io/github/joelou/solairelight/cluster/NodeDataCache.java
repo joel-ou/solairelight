@@ -1,19 +1,9 @@
 package io.github.joelou.solairelight.cluster;
 
-import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.time.Duration;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,6 +18,10 @@ public class NodeDataCache {
 
     private long timestamp = 0L;
 
+    private boolean sleep = false;
+
+    public NodeDataCache() {
+    }
     public NodeDataCache(NodeData nodeData) {
         this.nodeData = nodeData;
     }
@@ -41,8 +35,26 @@ public class NodeDataCache {
         }
     }
 
-    public int failedTimes(){
+    public int getFailedTimes(){
         return failedTimes.intValue();
+    }
+
+    public boolean isSleep() {
+        if(sleep && System.currentTimeMillis() - timestamp > Duration.ofMinutes(3).toMillis())
+            wakeup();
+        return sleep;
+    }
+
+    public void sleep() {
+        this.sleep = true;
+    }
+
+    public void wakeup() {
+        this.sleep = false;
+    }
+
+    void update(NodeData nodeData) {
+        this.nodeData = nodeData;
     }
 
     @Override

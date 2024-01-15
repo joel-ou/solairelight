@@ -13,15 +13,17 @@ class NodeDataCacheStorage {
 
     public static boolean add(NodeData nodeData) {
         Optional<NodeDataCache> nd;
-        NodeDataCache cache = new NodeDataCache(nodeData);
+        NodeDataCache cache = new NodeDataCache();
         if((nd = find(nodeData)).isPresent()) {
             int status = nd.get().getNodeData().getBasicInfo().getStatus().intValue();
             //keep the status of the cached node.
             if(status == 3 && nodeData.getVersion() > 0) {
                 nodeData.getBasicInfo().getStatus().set(status);
             }
+            cache = nd.get();
             nodeDataCache.remove(cache);
         }
+        cache.update(nodeData);
         return nodeDataCache.add(cache);
     }
 
@@ -31,15 +33,16 @@ class NodeDataCacheStorage {
         AtomicReference<NodeDataCache> del = new AtomicReference<>();
         List<NodeData> result = nodeDataCache.stream()
                 .filter(cache->{
+                    if(cache.isSleep()) return false;
                     int status = cache.getNodeData().getBasicInfo().getStatus().intValue();
                     long lastHeartbeat;
                     if((lastHeartbeat = cache.getNodeData().getVersion()) != 0
-                            && cur- lastHeartbeat>= Duration.ofSeconds(5).toMinutes()
+                            && cur- lastHeartbeat>= Duration.ofSeconds(60).toMillis()
                             && status == 1) {
-                        status(cache.getNodeData().getBasicInfo(), 1, 2);
+                        unhealthy(cache.getNodeData());
                     }
                     //delete the node after 10 minutes exceeded.
-                    if((cur - lastHeartbeat) > Duration.ofMinutes(1).toMinutes()
+                    if((cur - lastHeartbeat) > Duration.ofMinutes(10).toMillis()
                             && status == 3){
                         del.set(cache);
                         return false;
@@ -66,10 +69,13 @@ class NodeDataCacheStorage {
 
     public static void failed(NodeData.BasicInfo basicInfo){
         find(basicInfo).ifPresent(n->{
-            if(n.failedTimes() >= 3) {
-                status(basicInfo, 2, 3);
-            } else {
-                n.failed();
+            n.failed();
+            if(n.getFailedTimes() >= 3) {
+                if(basicInfo.getStatus().intValue() == 2) {
+                    status(basicInfo, 2, 3);
+                } else {
+                    n.sleep();
+                }
             }
         });
     }
