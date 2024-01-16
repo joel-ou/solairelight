@@ -15,7 +15,6 @@ public class SessionDisconnectedEventImpl implements SessionDisconnectedEvent {
 
     @Override
     public void execute(EventContext<BasicSession> context) {
-        System.out.println(context.getArgument().getSessionId());
         log.info("disconnected event triggered. {}", context);
     }
 }

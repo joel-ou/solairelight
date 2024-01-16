@@ -1,6 +1,6 @@
-package io.github.joelou.solairelight;
+package io.github.joelou.solairelight.cluster;
 
-import io.github.joelou.solairelight.cluster.SolairelightRedisClient;
+import io.github.joelou.solairelight.SolairelightStarter;
 import io.github.joelou.solairelight.event.SolairelightEvent;
 import io.github.joelou.solairelight.filter.SolairelightFilter;
 import io.github.joelou.solairelight.properties.SolairelightProperties;

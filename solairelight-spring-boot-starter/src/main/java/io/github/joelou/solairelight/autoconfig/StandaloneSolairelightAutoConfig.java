@@ -6,6 +6,7 @@ import io.github.joelou.solairelight.filter.SolairelightFilter;
 import io.github.joelou.solairelight.properties.SolairelightProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
@@ -17,6 +18,7 @@ import java.util.Set;
 @AutoConfiguration
 @Import(SolairelightConfig.class)
 @ConditionalOnProperty(value = "solairelight.cluster.enable", havingValue = "false")
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 public class StandaloneSolairelightAutoConfig {
 
     @Bean

@@ -8,6 +8,8 @@ import io.github.joelou.solairelight.forward.ForwardService;
 import io.github.joelou.solairelight.properties.SolairelightProperties;
 import io.github.joelou.solairelight.socket.SolairelightWebSocketHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,8 @@ import java.util.Map;
 @Configuration
 @ComponentScan(basePackageClasses= SolairelightPackage.class)
 @ConditionalOnProperty(value = "solairelight.enable", havingValue = "true")
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+@EnableConfigurationProperties(SolairelightProperties.class)
 public class SolairelightConfig {
 
     @Bean

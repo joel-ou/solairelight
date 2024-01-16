@@ -15,7 +15,6 @@ public class MessageEventImpl implements MessageEvent {
 
     @Override
     public void execute(EventContext<MessageWrapper> context) {
-        System.out.println(context.getArgument().isForwardable());
         log.info("message event. {}", context);
     }
 }

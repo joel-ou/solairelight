@@ -47,11 +47,11 @@ public class SolairelightRedisClient {
         return instance;
     }
 
-    public void nodeRegister(){
+    void nodeRegister(){
         nodeRegister(false);
     }
 
-    public void nodeRegister(boolean reRegister){
+    void nodeRegister(boolean reRegister){
         running = true;
         nodeId = NODE_INFO.getNodeId();
         String msgPrefix = buildMsg(NODE_INFO);
@@ -77,7 +77,7 @@ public class SolairelightRedisClient {
         if(!reRegister) heartbeat();
     }
 
-    public void nodeUnregister(){
+    void nodeUnregister(){
         running = false;
         String msgPrefix = buildMsg(NODE_INFO);
         redisTemplate

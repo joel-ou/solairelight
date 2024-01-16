@@ -15,7 +15,6 @@ public class SessionConnectedEventImpl implements SessionConnectedEvent {
 
     @Override
     public void execute(EventContext<BasicSession> context) {
-        System.out.println(context.getArgument().getSessionId());
         log.info("connected event triggered. {}", context);
     }
 }

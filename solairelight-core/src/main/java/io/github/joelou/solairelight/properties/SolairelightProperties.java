@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
  * @author Joel Ou
  */
 @Data
-@Component
 @ConfigurationProperties(prefix = "solairelight")
 @ToString
 public class SolairelightProperties {

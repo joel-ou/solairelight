@@ -15,7 +15,7 @@ Solairelight 是基于SpringWebFlux开发的WebSocket消息服务，支持单机
 
 ## 基础要求
 
-* Spring-Boot 2.X.X</br>
+* Spring-Boot 2.7.X</br>
 * JDK 1.8 及以上
 
 ## 如何使用

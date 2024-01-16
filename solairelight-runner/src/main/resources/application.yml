@@ -5,6 +5,13 @@ logging:
   level:
     io.github.joelou.solairelight.*: debug
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: nodeOverview
+      discovery:
+        enabled: true
 
 #SolairelightConfig example
 solairelight:
