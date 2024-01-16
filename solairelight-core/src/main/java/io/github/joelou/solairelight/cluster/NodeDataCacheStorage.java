@@ -15,11 +15,6 @@ class NodeDataCacheStorage {
         Optional<NodeDataCache> nd;
         NodeDataCache cache = new NodeDataCache();
         if((nd = find(nodeData)).isPresent()) {
-            int status = nd.get().getNodeData().getBasicInfo().getStatus().intValue();
-            //keep the status of the cached node.
-            if(status == 3 && nodeData.getVersion() > 0) {
-                nodeData.getBasicInfo().getStatus().set(status);
-            }
             cache = nd.get();
             nodeDataCache.remove(cache);
         }
