@@ -16,11 +16,14 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.regex.Pattern;
+
 /**
  * @author Joel Ou
  */
 @Slf4j
 public class BroadcastRequestFunctionHandler {
+    private final static Pattern pattern = Pattern.compile("^\\w+={2}((\\d+|-*\\d+.{1}\\d+)+|'\\w+')(\\s*(&{2}|[|]{2}|and|or)\\s*\\w+={2}((\\d+|-*\\d+.{1}\\d+)+|'\\w+'))*$");
 
     public static RouterFunction<ServerResponse> broadcast(BroadcastService broadcastService){
         return RouterFunctions.route().POST("solairelight/broadcast", request -> {
@@ -34,6 +37,9 @@ public class BroadcastRequestFunctionHandler {
                             sink.next(mw);
                         } else {
                             sink.error(new ResponseMessageException(ExceptionEnum.FILTER_ABORTED));
+                        }
+                        if (!checkElString(param.getPredicate())) {
+                            sink.error(new ResponseMessageException(ExceptionEnum.INVALID_PREDICATE_VALUE));
                         }
                     })
                     .map(obj->((MessageWrapper)obj).getMessage())
@@ -63,5 +69,9 @@ public class BroadcastRequestFunctionHandler {
                         return ServerResponse.badRequest().bodyValue(DistributeResult.failure("e00", "unknown error"));
                     });
         }).build();
+    }
+
+    private static boolean checkElString(String el){
+        return pattern.matcher(el).matches();
     }
 }
