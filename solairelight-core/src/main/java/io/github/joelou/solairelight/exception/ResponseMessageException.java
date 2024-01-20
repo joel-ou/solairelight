@@ -25,7 +25,7 @@ public class ResponseMessageException extends RuntimeException {
     }
 
     public ResponseMessageException(ExceptionEnum exceptionEnum, String joint) {
-        super(exceptionEnum.getMessage());
+        super(exceptionEnum.getMessage()+joint);
         this.code = exceptionEnum.getCode();
     }
 }

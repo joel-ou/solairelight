@@ -11,13 +11,15 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class WebSocketSender implements BroadcastSender {
+    private final String BASE64_PREFIX = "base64:";
+
     @Override
     public void send(BasicSession basicSession, Object message) {
         WebSocketSessionExpand session = ((WebSocketSessionExpand) basicSession);
         if(message instanceof String){
             String messageStr = message.toString();
-            if(Base64.isBase64(messageStr)){
-                sendBytes(session, Base64.decodeBase64(messageStr));
+            if(Base64.isBase64(messageStr) && messageStr.startsWith(BASE64_PREFIX)){
+                sendBytes(session, Base64.decodeBase64(messageStr.replace(BASE64_PREFIX, "")));
             } else {
                 session.getSink()
                         .next(session.getOriginalSession().textMessage(messageStr));

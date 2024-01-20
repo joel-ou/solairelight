@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public class BroadcastRequestFunctionHandler {
-    private final static Pattern pattern = Pattern.compile("^\\w+={2}((\\d+|-*\\d+.{1}\\d+)+|'\\w+')(\\s*(&{2}|[|]{2}|and|or)\\s*\\w+={2}((\\d+|-*\\d+.{1}\\d+)+|'\\w+'))*$");
+    private final static Pattern pattern = Pattern.compile("^\\w+={2}((\\d+|-?\\d+.\\d+)+|'\\w+')(\\s*(&{2}|[|]{2}|and|or)\\s*\\w+={2}((\\d+|-*\\d+.{1}\\d+)+|'\\w+'))*$");
 
     public static RouterFunction<ServerResponse> broadcast(BroadcastService broadcastService){
         return RouterFunctions.route().POST("solairelight/broadcast", request -> {
@@ -32,14 +32,15 @@ public class BroadcastRequestFunctionHandler {
             return broadcastParam
                     .handle((param, sink)->{
                         MessageWrapper mw = MessageWrapper.create(param);
+                        if (!checkElString(param.getPredicate())) {
+                            sink.error(new ResponseMessageException(ExceptionEnum.INVALID_PREDICATE_VALUE));
+                            return;
+                        }
                         FilterContext<Object> result = FilterFactory.outgoingMessage().filter(FilterContext.init(mw));
                         if(result.isPass()) {
                             sink.next(mw);
                         } else {
                             sink.error(new ResponseMessageException(ExceptionEnum.FILTER_ABORTED));
-                        }
-                        if (!checkElString(param.getPredicate())) {
-                            sink.error(new ResponseMessageException(ExceptionEnum.INVALID_PREDICATE_VALUE));
                         }
                     })
                     .map(obj->((MessageWrapper)obj).getMessage())
@@ -49,7 +50,12 @@ public class BroadcastRequestFunctionHandler {
                     .last()
                     .map(x->response)
                     .doOnError(e-> log.error("unexpected broadcast failed.", e))
-                    .onErrorReturn(BroadcastHttpResponse.failure("unexpected broadcast failed."))
+                    .onErrorResume(e->{
+                        if(e instanceof ResponseMessageException) {
+                            return Mono.just(BroadcastHttpResponse.failure(e.getMessage()));
+                        }
+                        return Mono.just(BroadcastHttpResponse.failure("unexpected broadcast failed."));
+                    })
                     .flatMap(x->ServerResponse.ok().bodyValue(x));
         }).build();
     }
