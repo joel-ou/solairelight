@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -32,7 +33,7 @@ public class BroadcastRequestFunctionHandler {
             return broadcastParam
                     .handle((param, sink)->{
                         MessageWrapper mw = MessageWrapper.create(param);
-                        if (!checkElString(param.getPredicate())) {
+                        if (StringUtils.hasText(param.getPredicate()) && !checkElString(param.getPredicate())) {
                             sink.error(new ResponseMessageException(ExceptionEnum.INVALID_PREDICATE_VALUE));
                             return;
                         }
