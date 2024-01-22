@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +26,7 @@ public class CaffeineSessionStorage implements SessionStorage {
         sessionCaffeine = Caffeine.newBuilder()
                 .maximumSize(solairelightProperties.getSession().getMaxNumber())
                 .expireAfterAccess(Duration.ofSeconds(idleTime))
-                .scheduler(Scheduler.systemScheduler())
+                .scheduler(Scheduler.forScheduledExecutorService(Executors.newSingleThreadScheduledExecutor()))
                 .removalListener(new SessionRemovalCallback())
                 .weakValues()
                 .build();

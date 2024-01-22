@@ -54,7 +54,7 @@ public class SessionFinder {
             sessions = sessions
                     .stream()
                     .parallel()
-                    .filter(session->evaluator.evaluate(predicate, session.getUserMetadata().getUserFeatures()))
+                    .filter(session->session!=null&&evaluator.evaluate(predicate, session.getUserMetadata().getUserFeatures()))
                     .collect(Collectors.toSet());
             log.info("predicate matched {}.", sessions.size());
             return sessions;
