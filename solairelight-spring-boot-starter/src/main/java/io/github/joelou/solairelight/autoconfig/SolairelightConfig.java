@@ -1,7 +1,6 @@
 package io.github.joelou.solairelight.autoconfig;
 
 import io.github.joelou.solairelight.SolairelightPackage;
-import io.github.joelou.solairelight.SolairelightStarter;
 import io.github.joelou.solairelight.brodcast.BroadcastRequestFunctionHandler;
 import io.github.joelou.solairelight.brodcast.BroadcastService;
 import io.github.joelou.solairelight.forward.ForwardService;
