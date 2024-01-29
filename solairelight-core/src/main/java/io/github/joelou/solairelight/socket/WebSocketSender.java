@@ -3,8 +3,8 @@ package io.github.joelou.solairelight.socket;
 import io.github.joelou.solairelight.brodcast.BroadcastSender;
 import io.github.joelou.solairelight.exception.UnsupportedBroadcastingMessageException;
 import io.github.joelou.solairelight.session.BasicSession;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 
 /**
  * @author Joel Ou
@@ -18,8 +18,8 @@ public class WebSocketSender implements BroadcastSender {
         WebSocketSessionExpand session = ((WebSocketSessionExpand) basicSession);
         if(message instanceof String){
             String messageStr = message.toString();
-            if(Base64.isBase64(messageStr) && messageStr.startsWith(BASE64_PREFIX)){
-                sendBytes(session, Base64.decodeBase64(messageStr.replace(BASE64_PREFIX, "")));
+            if(messageStr.startsWith(BASE64_PREFIX)){
+                sendBytes(session, Base64Utils.decode(messageStr.replace(BASE64_PREFIX, "").getBytes()));
             } else {
                 session.getSink()
                         .next(session.getOriginalSession().textMessage(messageStr));

@@ -2,7 +2,6 @@ package io.github.joelou.solairelight.session;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.apache.commons.codec.binary.Base64;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

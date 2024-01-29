@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author Joel Ou
@@ -51,7 +50,7 @@ public class WebSocketBroadcaster extends AbstractBroadcaster {
                 localResult = localBroadcast(exprList, broadcastParam);
             }
         } catch (ResponseMessageException e) {
-            localResult = Mono.just(DistributeResult.failure(NodeData.instance.getBasicInfo(), e));
+            localResult = Mono.just(DistributeResult.failure(NodeData.instance.getBasicInfo(), e.getCode(), e.getMessage()));
         }
         return clusterResult.concatWith(localResult);
     }

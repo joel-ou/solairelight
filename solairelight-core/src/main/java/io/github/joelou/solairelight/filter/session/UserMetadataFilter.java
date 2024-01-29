@@ -8,8 +8,8 @@ import io.github.joelou.solairelight.session.index.IndexService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Base64Utils;
 
 import javax.annotation.Resource;
 import java.security.KeyFactory;
@@ -85,7 +85,7 @@ public class UserMetadataFilter implements SessionFilter {
             throw new RuntimeException("unsupported jwt algorithm.");
         }
         try {
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Base64.decodeBase64(publicKeyString));
+            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Base64Utils.decode(publicKeyString.getBytes()));
             KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
             return keyFactory.generatePublic(publicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {

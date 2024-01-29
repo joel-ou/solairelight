@@ -8,7 +8,15 @@
         <option value="$PROJECT_DIR$/solairelight-core/pom.xml" />
         <option value="$PROJECT_DIR$/solairelight-runner/pom.xml" />
         <option value="$PROJECT_DIR$/solairelight-spring-boot-starter/pom.xml" />
+        <option value="$PROJECT_DIR$/spring-gateway-runner/pom.xml" />
+        <option value="$PROJECT_DIR$/solairelight-spring-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/solairelight-cluster/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/solairelight-spring-gateway/pom.xml" />
+      </set>
     </option>
     <option name="workspaceImportForciblyTurnedOn" value="true" />
   </component>

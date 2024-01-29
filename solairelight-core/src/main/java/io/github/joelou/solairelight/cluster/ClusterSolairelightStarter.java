@@ -29,7 +29,7 @@ public class ClusterSolairelightStarter extends SolairelightStarter {
     public void start() {
         super.start();
         //cluster node register.
-        SolairelightRedisClient.init(solairelightRedisTemplate).nodeRegister();
+        SolairelightRedisClient.getInstance().nodeRegister();
     }
 
     @Override
