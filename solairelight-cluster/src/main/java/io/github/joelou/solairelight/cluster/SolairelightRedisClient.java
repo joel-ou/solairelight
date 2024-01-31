@@ -107,9 +107,6 @@ public class SolairelightRedisClient {
     }
 
     public Flux<NodeData> getNodeCacheFlux(){
-        if(NodeDataCacheStorage.isEmpty()) {
-            return refreshCache();
-        }
         return Flux.fromIterable(NodeDataCacheStorage.getCache());
     }
 

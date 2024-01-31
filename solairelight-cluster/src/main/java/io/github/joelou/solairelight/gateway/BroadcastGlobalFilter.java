@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.*;
 
@@ -39,7 +40,10 @@ public class BroadcastGlobalFilter implements GlobalFilter {
                 .getRequest()
                 .getBody()
                 //do broadcast.
-                .flatMap(message-> broadcastDistributor.distributeAllNode(message))
+                .flatMap(message-> {
+                    String json = message.toString(StandardCharsets.UTF_8);
+                    return broadcastDistributor.distributeAllNode(json);
+                })
                 .doOnNext(response::add)
                 .last(new NodeBroadcastingResponse())
                 .map(x->response)
