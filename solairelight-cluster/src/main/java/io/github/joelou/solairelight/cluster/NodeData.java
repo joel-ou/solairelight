@@ -27,7 +27,7 @@ public class NodeData implements Serializable{
 
     private final BasicInfo basicInfo = new BasicInfo();
 
-    private final AtomicInteger sessionNumber = new AtomicInteger();
+    private final AtomicInteger sessionQuota = new AtomicInteger();
 
     private long version;
 

@@ -1,0 +1,29 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedHeaders: "*"
+            allowedMethods:
+              - GET
+              - POST
+        add-to-simple-url-handler-mapping: true
+      routes:
+        - id: solairelight-broadcast-route
+          uri: solaire://broadcast
+          predicates:
+          - Path=/solairelight/broadcast
+        - id: solairelight-websocket-route
+          uri: lb:ws://solairelight
+          predicates:
+          - Path=/solairelight
+        - id: solairelight-session-route
+          uri: http://127.0.0.1:8081/session/token
+          predicates:
+            - Path=/session/token
+solairelight:
+  websocket:
+    routing:
+      mode: redirect

@@ -35,7 +35,7 @@ public class SolairelightWebSocketHandler implements WebSocketHandler {
         FilterContext<Object> result = FilterFactory.session().filter(FilterContext.init(sessionExpand));
         if(!result.isPass()) {
             //recover session number.
-            NodeData.instance.getSessionNumber().incrementAndGet();
+            NodeData.instance.getSessionQuota().incrementAndGet();
             return Mono.empty().then();
         }
 

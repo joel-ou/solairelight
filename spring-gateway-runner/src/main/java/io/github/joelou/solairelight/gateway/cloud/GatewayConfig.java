@@ -1,4 +1,4 @@
-package io.github.joelou.solairelight.cloud;
+package io.github.joelou.solairelight.gateway.cloud;
 
 import io.github.joelou.solairelight.config.SolairelightGatewayConfiguration;
 import org.springframework.context.annotation.Configuration;

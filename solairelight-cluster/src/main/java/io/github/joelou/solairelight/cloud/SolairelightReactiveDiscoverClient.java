@@ -28,14 +28,14 @@ public class SolairelightReactiveDiscoverClient implements ReactiveDiscoveryClie
         if(!serviceId.equals(ClusterTools.SOLAIRELIGHTS_SERVICE_ID)) {
             return Flux.empty();
         }
-        return SolairelightRedisClient.getInstance().getNodes().filter(node->{
+        return SolairelightRedisClient.getInstance().getNodeCacheFlux().filter(node->{
             //filter unhealthy node.
             return System.currentTimeMillis() - node.getVersion() < Duration.ofSeconds(2).toMillis();
         }).map(node->{
             NodeData.BasicInfo basicInfo = node.getBasicInfo();
             URI uri = URI.create(basicInfo.getUrl());
             Map<String, String> metadata = new HashMap<>();
-            metadata.put(ClusterTools.SOLAIRELIGHTS_SESSION_QUOTA_KEY, String.valueOf(node.getSessionNumber().intValue()));
+            metadata.put(ClusterTools.SOLAIRELIGHTS_SESSION_QUOTA_KEY, String.valueOf(node.getSessionQuota().intValue()));
             return new DefaultServiceInstance(basicInfo.getNodeId(),
                     ClusterTools.SOLAIRELIGHTS_SERVICE_ID, uri.getHost(), uri.getPort(), uri.getScheme().equals("https"),
                     metadata);

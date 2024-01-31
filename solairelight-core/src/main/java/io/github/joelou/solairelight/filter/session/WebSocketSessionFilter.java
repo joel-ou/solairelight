@@ -2,7 +2,6 @@ package io.github.joelou.solairelight.filter.session;
 
 import io.github.joelou.solairelight.filter.FilterContext;
 import io.github.joelou.solairelight.session.BasicSession;
-import io.github.joelou.solairelight.session.SessionBroker;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -46,9 +45,6 @@ public class WebSocketSessionFilter implements SessionFilter {
                 sessionHeads.put(kv[0], kv[1]);
             }
         }
-
-        //storage the session
-        SessionBroker.getStorage().put(basicSession.getSessionId(), basicSession);
         return FilterContext.pass(basicSession);
     }
 

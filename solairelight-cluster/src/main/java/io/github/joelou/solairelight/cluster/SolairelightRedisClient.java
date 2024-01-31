@@ -8,12 +8,15 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 /**
  * @author Joel Ou
@@ -104,6 +107,9 @@ public class SolairelightRedisClient {
     }
 
     public Flux<NodeData> getNodeCacheFlux(){
+        if(NodeDataCacheStorage.isEmpty()) {
+            return refreshCache();
+        }
         return Flux.fromIterable(NodeDataCacheStorage.getCache());
     }
 
@@ -157,14 +163,31 @@ public class SolairelightRedisClient {
                 NodeData.instance.updateVersion();
                 //do re-register for update node data.
                 nodeRegister(true);
-                //refresh node cache.
-                getNodes(true)
-                        .filter(nodeData -> !nodeData.getBasicInfo().getNodeId().equals(NODE_INFO.getNodeId()))
-                        .subscribe(NodeDataCacheStorage::add);
             }
         });
         heartbeat.setName("Solairelight-Heartbeat-Thread"+ClusterTools.getNodeId());
         heartbeat.start();
+    }
+
+    public Flux<NodeData> startNodeSync(BooleanSupplier stop){
+        log.info("solairelight node-synchronizer started");
+        Scheduler scheduler = Schedulers.newSingle("solairelight-node-synchronizer");
+        return Flux.interval(Duration.ZERO, Duration.ofSeconds(1), scheduler)
+                .handle((el,sink)->{
+                    if(stop.getAsBoolean()) {
+                        sink.complete();
+                        log.info("solairelight node-synchronizer stopped");
+                    } else {
+                        sink.next(el);
+                    }
+                })
+                .switchMap(l-> refreshCache());
+    }
+
+    private Flux<NodeData> refreshCache(){
+        //refresh node cache.
+        return getNodes(true)
+                .doOnNext(NodeDataCacheStorage::add);
     }
 
     private String buildMsg(NodeData.BasicInfo basicInfo){

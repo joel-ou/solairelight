@@ -11,6 +11,7 @@ import io.github.joelou.solairelight.session.SessionBroker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.Lifecycle;
+import org.springframework.core.Ordered;
 
 import java.util.Set;
 
@@ -18,7 +19,7 @@ import java.util.Set;
  * @author Joel Ou
  */
 @Slf4j
-public class SolairelightStarter implements Lifecycle {
+public class SolairelightStarter implements Lifecycle, Ordered {
     private boolean running = false;
 
     protected final SolairelightProperties solairelightProperties;
@@ -45,14 +46,14 @@ public class SolairelightStarter implements Lifecycle {
         SolairelightSettings.setNodeIdSuffix(solairelightProperties.getCluster().getNodeIdSuffix());
         ClusterTools.initNodeId(solairelightProperties.getCluster().getNodeIdSuffix());
         NodeData.instance.getBasicInfo().setPort(port);
-        NodeData.instance.getSessionNumber().set(solairelightProperties.getSession().getMaxNumber());
+        NodeData.instance.getSessionQuota().set(solairelightProperties.getSession().getMaxNumber());
         //init components
         SessionBroker.init(solairelightProperties);
         FilterFactory.init(this.filters);
         EventFactory.init(events);
         //after finished
         this.running = true;
-        log.info("solairelight started on path {} mode: {}", solairelightProperties.getWebSocketPath(),
+        log.info("solairelight started on path {} mode: {}", solairelightProperties.getWebsocket().getPath(),
                 SolairelightSettings.isCluster()?"cluster":"standalone");
     }
 
@@ -64,5 +65,10 @@ public class SolairelightStarter implements Lifecycle {
     @Override
     public boolean isRunning() {
         return running;
+    }
+
+    @Override
+    public int getOrder() {
+        return LOWEST_PRECEDENCE-2;
     }
 }

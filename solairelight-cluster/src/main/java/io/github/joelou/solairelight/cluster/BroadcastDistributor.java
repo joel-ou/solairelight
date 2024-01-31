@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
  */
 public interface BroadcastDistributor {
 
-    Flux<DistributeResult> distributeSpecified(Object broadcastParam, NodeData.BasicInfo basicInfo);
+    Flux<NodeBroadcastingResponse> distributeSpecified(Object broadcastParam, NodeData.BasicInfo basicInfo);
 
-    Flux<DistributeResult> distributeAllNode(Object broadcastParam);
+    Flux<NodeBroadcastingResponse> distributeAllNode(Object broadcastParam);
 }

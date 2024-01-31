@@ -1,12 +1,22 @@
 package io.github.joelou.solairelight.runner.controller;
 
+import io.github.joelou.solairelight.SolairelightSettings;
+import io.github.joelou.solairelight.cluster.ClusterTools;
+import io.github.joelou.solairelight.properties.SolairelightProperties;
 import io.jsonwebtoken.Jwts;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
+import javax.annotation.Resource;
+import java.net.URI;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -23,6 +33,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("session")
 public class SessionController {
+
+    @Resource
+    private LoadBalancerClientFactory clientFactory;
+    @Resource
+    private SolairelightProperties solairelightProperties;
+
     private final byte[] keyBytes = Base64Utils.decode(("MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC7VJTUt9Us8cKj" +
                 "MzEfYyjiWA4R4/M2bS1GB4t7NXp98C3SC6dVMvDuictGeurT8jNbvJZHtCSuYEvu" +
                 "NMoSfm76oqFvAp8Gy0iz5sxjZmSnXyCdPEovGhLa0VzMaQ8s+CLOyS56YyCFGeJZ" +
@@ -51,14 +67,32 @@ public class SessionController {
                 "dn/RsYEONbwQSjIfMPkvxF+8HQ==").getBytes());
 
     @PostMapping("/token")
-    public String createToken(@RequestBody Map<String, Object> userMetadata) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public Mono<NewSessionResponse> createToken(@RequestBody Map<String, Object> userMetadata) throws NoSuchAlgorithmException, InvalidKeySpecException {
         PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(keyBytes);
         Key privateKey = KeyFactory.getInstance("RSA").generatePrivate(privateKeySpec);
 
-        return Jwts.builder()
+        NewSessionResponse newSessionResponse = new NewSessionResponse();
+        String token = Jwts.builder()
                 .claims(userMetadata)
                 .expiration(Date.from(LocalDateTime.now().atZone(ZoneOffset.systemDefault()).plusMinutes(1).toInstant()))
                 .signWith(privateKey)
                 .compact();
+        newSessionResponse.setToken(token);
+        if(SolairelightSettings.isCluster()){
+            ReactorLoadBalancer<ServiceInstance> loadBalancer = this.clientFactory.getInstance(ClusterTools.SOLAIRELIGHTS_SERVICE_ID,
+                    ReactorServiceInstanceLoadBalancer.class);
+            return loadBalancer.choose().map(instance->{
+                if(instance.hasServer()) {
+                    URI uri = instance.getServer().getUri();
+                    String instanceUri = String.format("%s%s%s", uri.getHost(), uri.getPort()>0?":"+uri.getPort():uri.getPort(),
+                            solairelightProperties.getWebsocket().getPath());
+                    newSessionResponse.setInstance(instanceUri);
+                }
+                return newSessionResponse;
+            });
+        } else {
+            newSessionResponse.setInstance(null);
+        }
+        return Mono.just(newSessionResponse);
     }
 }

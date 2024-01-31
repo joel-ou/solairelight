@@ -12,10 +12,10 @@ public class SessionNumberEvent implements SessionConnectedEvent, SessionDisconn
     public void execute(EventContext<BasicSession> context) {
         switch (context.getTrigger()) {
             case SESSION_CONNECTED:
-                NodeData.instance.getSessionNumber().decrementAndGet();
+                NodeData.instance.getSessionQuota().decrementAndGet();
                 break;
             case SESSION_DISCONNECTED:
-                NodeData.instance.getSessionNumber().incrementAndGet();
+                NodeData.instance.getSessionQuota().incrementAndGet();
                 break;
         }
     }

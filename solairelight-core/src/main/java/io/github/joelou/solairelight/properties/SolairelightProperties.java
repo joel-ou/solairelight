@@ -3,7 +3,6 @@ package io.github.joelou.solairelight.properties;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Joel Ou
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component;
 @ToString
 public class SolairelightProperties {
     private boolean enable = true;
-    private String webSocketPath = "/path";
+    private WebsocketProperties websocket;
     private SecureProperties secure;
     private MessageProperties message;
     private SessionProperties session;

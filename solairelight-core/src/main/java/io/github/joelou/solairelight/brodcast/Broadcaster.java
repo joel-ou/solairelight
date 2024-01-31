@@ -1,12 +1,10 @@
 package io.github.joelou.solairelight.brodcast;
 
-import io.github.joelou.solairelight.cluster.DistributeResult;
+import io.github.joelou.solairelight.cluster.NodeBroadcastingResponse;
 import lombok.Getter;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author Joel Ou
@@ -24,9 +22,7 @@ public interface Broadcaster {
         }
     }
 
-    Flux<DistributeResult> broadcast(BroadcastParam broadcastParam);
+    Mono<NodeBroadcastingResponse> localBroadcast(BroadcastParam broadcastParam);
 
-    Mono<DistributeResult> localBroadcast(BroadcastParam broadcastParam);
-
-    Mono<DistributeResult> localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam);
+    Mono<NodeBroadcastingResponse> localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam);
 }

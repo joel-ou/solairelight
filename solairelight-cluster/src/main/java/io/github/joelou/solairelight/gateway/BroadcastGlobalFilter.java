@@ -1,7 +1,7 @@
 package io.github.joelou.solairelight.gateway;
 
 import io.github.joelou.solairelight.cluster.BroadcastDistributor;
-import io.github.joelou.solairelight.cluster.ClusterTools;
+import io.github.joelou.solairelight.cluster.NodeBroadcastingResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -27,27 +27,29 @@ public class BroadcastGlobalFilter implements GlobalFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         URI url = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
         String schemePrefix = exchange.getAttribute(GATEWAY_SCHEME_PREFIX_ATTR);
-        if (url == null || (!ClusterTools.SOLAIRELIGHTS_SERVICE_ID.equals(url.getScheme()) && !ClusterTools.SOLAIRELIGHTS_SERVICE_ID.equals(schemePrefix))) {
+        if (url == null || (!"solaire".equals(url.getScheme()) && !"solaire".equals(schemePrefix))) {
             return chain.filter(exchange);
         }
-        BroadcastHttpResponse response = new BroadcastHttpResponse();
+        BroadcastingHttpResponse response = new BroadcastingHttpResponse();
         if(!url.getHost().equals("broadcast")){
             throw new RuntimeException("unsupported solaire host.");
         }
         setAlreadyRouted(exchange);
-        return exchange.getRequest().getBody()
+        return exchange
+                .getRequest()
+                .getBody()
                 //do broadcast.
                 .flatMap(message-> broadcastDistributor.distributeAllNode(message))
                 .doOnNext(response::add)
-                .last()
+                .last(new NodeBroadcastingResponse())
                 .map(x->response)
                 .doOnError(e-> log.error("unexpected broadcast failed.", e))
-                .onErrorResume(e-> Mono.just(BroadcastHttpResponse.failure("unexpected failed")))
+                .onErrorResume(e-> Mono.just(BroadcastingHttpResponse.failure("unexpected failed")))
                 .flatMap(res->{
                     return BodyInserters
                             .fromValue(res)
                             .insert(exchange.getResponse(), new BodyInserterContext());
                 })
-                .flatMap(m->chain.filter(exchange));
+                .then(chain.filter(exchange));
     }
 }

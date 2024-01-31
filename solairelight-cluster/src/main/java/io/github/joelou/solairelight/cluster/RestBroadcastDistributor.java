@@ -25,24 +25,23 @@ public class RestBroadcastDistributor implements BroadcastDistributor {
     private ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate;
 
     @Override
-    public Flux<DistributeResult> distributeSpecified(Object broadcastParam,
-                                                      NodeData.BasicInfo basicInfo) {
+    public Flux<NodeBroadcastingResponse> distributeSpecified(Object broadcastParam,
+                                                              NodeData.BasicInfo basicInfo) {
         return post(broadcastParam, basicInfo).flux();
     }
 
     @Override
-    public Flux<DistributeResult> distributeAllNode(Object broadcastParam) {
+    public Flux<NodeBroadcastingResponse> distributeAllNode(Object broadcastParam) {
         return SolairelightRedisClient
                 .getInstance()
-                .getNodes()
-                .filter(nodeData -> !nodeData.getBasicInfo().getNodeId().equals(ClusterTools.getNodeId()))
+                .getNodeCacheFlux()
                 .flatMap(nodeData -> post(broadcastParam, nodeData.getBasicInfo()));
     }
 
-    private Mono<DistributeResult> post(Object broadcastParam, NodeData.BasicInfo basicInfo){
+    private Mono<NodeBroadcastingResponse> post(Object broadcastParam, NodeData.BasicInfo basicInfo){
         log.info("distribute to node {}.", basicInfo);
         String uri = basicInfo.getUrl();
-        uri = String.format("%s/solairelight/distributor/entrance", uri);
+        uri = String.format("%s/solairelight/broadcast", uri);
         return DistributeWebClient
                 .post(uri, broadcastParam)
                 .retryWhen(Retry.backoff(3, Duration.ofSeconds(1)).filter(e->e instanceof ConnectException))
@@ -53,13 +52,13 @@ public class RestBroadcastDistributor implements BroadcastDistributor {
                         return response.getBody();
                     } else {
                         log.error("distribute done node {} and result: {}", basicInfo, "http request failed");
-                        return DistributeResult.failure(basicInfo, ClusterExceptionEnum.DISTRIBUTE_FAILED_HTTP);
+                        return NodeBroadcastingResponse.failure(basicInfo, ClusterExceptionEnum.DISTRIBUTE_FAILED_HTTP);
                     }
                 })
                 .onErrorResume((e)-> {
                     NodeDataCacheStorage.failed(basicInfo);
                     log.error("error occurred when distribute to node {}.", basicInfo);
-                    return Mono.just(DistributeResult.failure(basicInfo, "distribute failed."));
+                    return Mono.just(NodeBroadcastingResponse.failure(basicInfo, "distribute failed."));
                 });
     }
 }

@@ -2,18 +2,16 @@ package io.github.joelou.solairelight.brodcast;
 
 import io.github.joelou.solairelight.cluster.BroadcastDistributor;
 import io.github.joelou.solairelight.cluster.ClusterTools;
-import io.github.joelou.solairelight.cluster.DistributeResult;
+import io.github.joelou.solairelight.cluster.NodeBroadcastingResponse;
 import io.github.joelou.solairelight.cluster.NodeData;
 import io.github.joelou.solairelight.exception.DuplicatedBroadcastException;
 import io.github.joelou.solairelight.exception.NoSessionFoundException;
-import io.github.joelou.solairelight.exception.ResponseMessageException;
 import io.github.joelou.solairelight.properties.SolairelightProperties;
 import io.github.joelou.solairelight.session.BasicSession;
 import io.github.joelou.solairelight.session.SessionFinder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
@@ -39,30 +37,13 @@ public class WebSocketBroadcaster extends AbstractBroadcaster {
     private BroadcastSender broadcastSender;
 
     @Override
-    public Flux<DistributeResult> broadcast(BroadcastParam broadcastParam) {
-        Flux<DistributeResult> clusterResult = broadcastDistributor.distributeAllNode(broadcastParam);
-        Mono<DistributeResult> localResult;
-        try {
-            if(broadcastParam.getRange().equals("*")){
-                localResult = localBroadcast(null, broadcastParam);
-            } else {
-                LinkedList<String[]> exprList = parseRange(broadcastParam.getRange());
-                localResult = localBroadcast(exprList, broadcastParam);
-            }
-        } catch (ResponseMessageException e) {
-            localResult = Mono.just(DistributeResult.failure(NodeData.instance.getBasicInfo(), e.getCode(), e.getMessage()));
-        }
-        return clusterResult.concatWith(localResult);
-    }
-
-    @Override
-    public Mono<DistributeResult> localBroadcast(BroadcastParam broadcastParam){
+    public Mono<NodeBroadcastingResponse> localBroadcast(BroadcastParam broadcastParam){
         LinkedList<String[]> exprList = parseRange(broadcastParam.getRange());
         return localBroadcast(exprList, broadcastParam);
     }
 
     @Override
-    public Mono<DistributeResult> localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam){
+    public Mono<NodeBroadcastingResponse> localBroadcast(LinkedList<String[]> exprList, BroadcastParam broadcastParam){
         if(super.duplicated(broadcastParam.getId())){
             log.info("duplicated broadcast {}", broadcastParam);
             throw new DuplicatedBroadcastException();
@@ -80,10 +61,13 @@ public class WebSocketBroadcaster extends AbstractBroadcaster {
             super.cache(broadcastParam.getId());
         }
         log.info("broadcast success {} matched", sessions.size());
-        return Mono.just(DistributeResult.success(NodeData.instance.getBasicInfo()));
+        return Mono.just(NodeBroadcastingResponse.success(NodeData.instance.getBasicInfo()));
     }
 
     private LinkedList<String[]> parseRange(String range){
+        if(range.equals("*")){
+            return null;
+        }
         LinkedList<String[]> exprList = new LinkedList<>();
         String[] expr = range.split(",");
         for (String e : expr) {

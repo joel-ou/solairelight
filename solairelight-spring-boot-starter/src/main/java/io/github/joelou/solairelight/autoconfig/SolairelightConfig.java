@@ -38,7 +38,7 @@ public class SolairelightConfig {
     public HandlerMapping handlerMapping(SolairelightProperties properties,
                                          SolairelightWebSocketHandler solairelightWebSocketHandler) {
         Map<String, WebSocketHandler> map = new HashMap<>();
-        map.put(properties.getWebSocketPath(), solairelightWebSocketHandler);
+        map.put(properties.getWebsocket().getPath(), solairelightWebSocketHandler);
         int order = -1; // before annotated controllers
         return new SimpleUrlHandlerMapping(map, order);
     }

@@ -1,7 +1,8 @@
 package io.github.joelou.solairelight.config;
 
-import io.github.joelou.solairelight.cluster.SolairelightRedisClient;
+import io.github.joelou.solairelight.cluster.SolairelightClusterLifecycle;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
@@ -13,6 +14,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
  * @author Joel Ou
  */
 @Configuration
+@ComponentScan(basePackages = "io.github.joelou.solairelight.cluster")
 public class SolairelightClusterConfiguration {
 
     @Bean
@@ -26,8 +28,11 @@ public class SolairelightClusterConfiguration {
                 .hashKey(keySerializer)
                 .hashValue(valueSerializer)
                 .build();
-        ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate = new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, serializationContext);
-        SolairelightRedisClient.init(solairelightRedisTemplate);
-        return solairelightRedisTemplate;
+        return new ReactiveRedisTemplate<>(reactiveRedisConnectionFactory, serializationContext);
+    }
+
+    @Bean
+    public SolairelightClusterLifecycle clusterLifecycle(ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate){
+        return new SolairelightClusterLifecycle(solairelightRedisTemplate);
     }
 }

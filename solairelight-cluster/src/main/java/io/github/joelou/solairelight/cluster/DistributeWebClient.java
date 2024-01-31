@@ -29,12 +29,12 @@ class DistributeWebClient {
         webClient = WebClient.builder().clientConnector(connector).build();
     }
 
-    public static Mono<ResponseEntity<DistributeResult>> post(String uri,
-                                                                   Object body){
+    public static Mono<ResponseEntity<NodeBroadcastingResponse>> post(String uri,
+                                                                      Object body){
         return post(uri, body, null);
     }
 
-    public static Mono<ResponseEntity<DistributeResult>> post(String uri, Object body, MultiValueMap<String, String> headers){
+    public static Mono<ResponseEntity<NodeBroadcastingResponse>> post(String uri, Object body, MultiValueMap<String, String> headers){
         return webClient
                 .post()
                 .uri(uri)
@@ -46,7 +46,7 @@ class DistributeWebClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .retrieve()
-                .toEntity(DistributeResult.class)
+                .toEntity(NodeBroadcastingResponse.class)
                 .doOnError(e-> log.error("error occurred. url {}", uri, e));
     }
 }

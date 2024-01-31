@@ -18,7 +18,7 @@ public class SessionNumberPredicate implements BiPredicate<Object, ServerWebExch
 
     @Override
     public boolean test(Object object, ServerWebExchange serverWebExchange) {
-        AtomicInteger sessionNumber = NodeData.instance.getSessionNumber();
+        AtomicInteger sessionNumber = NodeData.instance.getSessionQuota();
         if(sessionNumber.get() <= 0){
             return false;
         }
@@ -29,9 +29,9 @@ public class SessionNumberPredicate implements BiPredicate<Object, ServerWebExch
     private boolean redirect(ServerWebExchange serverWebExchange){
         SolairelightRedisClient.getInstance().getNodeCache()
                 .stream()
-                .max(Comparator.comparingInt(obj -> obj.getSessionNumber().get()))
+                .max(Comparator.comparingInt(obj -> obj.getSessionQuota().get()))
                 .ifPresent(nodeData -> {
-                    if(nodeData.getSessionNumber().get() <= 0)return;
+                    if(nodeData.getSessionQuota().get() <= 0)return;
                     String uri = nodeData.getBasicInfo().getUrl();
                     uri += serverWebExchange.getRequest().getPath();
                     ServerHttpResponse response = serverWebExchange.getResponse();

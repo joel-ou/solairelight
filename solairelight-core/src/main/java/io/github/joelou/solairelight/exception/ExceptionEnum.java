@@ -14,7 +14,8 @@ public enum ExceptionEnum {
     UNSUPPORTED_BROADCASTING_MESSAGE("e05", "unsupported broadcasting message only support String & Bytes"),
     FILTER_ABORTED("e06", "filter aborted."),
     DISTRIBUTE_FAILED_HTTP("e07", "distribute failed http error."),
-    INVALID_PREDICATE_VALUE("e08", "invalid predicate argument.");
+    INVALID_PREDICATE_VALUE("e08", "invalid predicate argument."),
+    UNEXPECTED_BROADCAST_ERROR("e99", "unexpected broadcast error.");
 
     private final String code;
     private final String message;

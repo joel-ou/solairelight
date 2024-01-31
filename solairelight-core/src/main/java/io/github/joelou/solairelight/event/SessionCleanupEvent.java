@@ -25,6 +25,6 @@ public class SessionCleanupEvent implements SessionDisconnectedEvent {
         SessionBroker.getStorage().invalidate(sessionId);
         indexService.deleteBySessionId(sessionId);
         //recover session number.
-        NodeData.instance.getSessionNumber().incrementAndGet();
+        NodeData.instance.getSessionQuota().incrementAndGet();
     }
 }

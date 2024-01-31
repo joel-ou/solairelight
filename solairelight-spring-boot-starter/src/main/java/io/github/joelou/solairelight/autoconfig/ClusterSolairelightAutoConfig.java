@@ -44,7 +44,8 @@ public class ClusterSolairelightAutoConfig {
     }
 
     //functions
-    @Bean
+    @Deprecated
+    //deprecated since 1.0.3.alpha
     public RouterFunction<ServerResponse> distributorEntrance(BroadcastService broadcastService){
         return BroadcastRequestFunctionHandler.distributorEntrance(broadcastService);
     }

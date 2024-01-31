@@ -3,7 +3,6 @@ package io.github.joelou.solairelight.gateway;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter;
-import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,13 +18,6 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.*
  * @author Joel Ou
  */
 public class SoalireSocketRedirectGlobalFilter implements GlobalFilter, Ordered {
-    public final static String ROUTING_MODEL_REDIRECT = "redirect";
-
-    private final LoadBalancerClientFactory clientFactory;
-
-    public SoalireSocketRedirectGlobalFilter(LoadBalancerClientFactory clientFactory) {
-        this.clientFactory = clientFactory;
-    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -38,9 +30,11 @@ public class SoalireSocketRedirectGlobalFilter implements GlobalFilter, Ordered 
             return chain.filter(exchange);
         }
         if (!exchange.getResponse().isCommitted()) {
+            setAlreadyRouted(exchange);
             setResponseStatus(exchange, HttpStatus.TEMPORARY_REDIRECT);
             final ServerHttpResponse response = exchange.getResponse();
-            response.getHeaders().set(HttpHeaders.LOCATION, url.toString());
+            String redirectUrl = exchange.getAttribute(GATEWAY_REQUEST_URL_ATTR);
+            response.getHeaders().set(HttpHeaders.LOCATION, redirectUrl);
             return response.setComplete();
         }
         return chain.filter(exchange);

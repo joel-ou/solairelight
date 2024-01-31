@@ -25,6 +25,10 @@ class NodeDataCacheStorage {
         return nodeDataCache.add(cache);
     }
 
+    public static boolean isEmpty(){
+        return nodeDataCache.isEmpty();
+    }
+
 
     public static List<NodeData> getCache(){
         long cur = System.currentTimeMillis();
