@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Set;
 
@@ -24,8 +25,9 @@ public class StandaloneSolairelightAutoConfig {
     @Bean
     public SolairelightStarter solairelightStarter(SolairelightProperties solairelightProperties,
                                                     Set<SolairelightFilter<?>> filters,
-                                                    Set<SolairelightEvent<?>> events){
+                                                    Set<SolairelightEvent<?>> events,
+                                                   WebClient.Builder loadBalancedWebClientBuilder){
         return new SolairelightStarter(solairelightProperties,
-                filters, events);
+                filters, events, loadBalancedWebClientBuilder);
     }
 }

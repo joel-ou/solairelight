@@ -10,8 +10,10 @@ import io.github.joelou.solairelight.socket.SolairelightWebSocketHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.*;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
@@ -52,5 +54,11 @@ public class SolairelightConfig {
     @Bean
     public RouterFunction<ServerResponse> broadcastFunction(BroadcastService broadcastService){
         return BroadcastRequestFunctionHandler.broadcast(broadcastService);
+    }
+
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
     }
 }

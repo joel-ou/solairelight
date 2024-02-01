@@ -6,12 +6,14 @@ import io.github.joelou.solairelight.event.EventFactory;
 import io.github.joelou.solairelight.event.SolairelightEvent;
 import io.github.joelou.solairelight.filter.SolairelightFilter;
 import io.github.joelou.solairelight.filter.factory.FilterFactory;
+import io.github.joelou.solairelight.forward.ForwardWebClient;
 import io.github.joelou.solairelight.properties.SolairelightProperties;
 import io.github.joelou.solairelight.session.SessionBroker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.Lifecycle;
 import org.springframework.core.Ordered;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Set;
 
@@ -31,12 +33,16 @@ public class SolairelightStarter implements Lifecycle, Ordered {
     @Value("${server.port}")
     private String port;
 
+    private final WebClient.Builder loadBalancedWebClientBuilder;
+
     public SolairelightStarter(SolairelightProperties solairelightProperties,
                                Set<SolairelightFilter<?>> filters,
-                               Set<SolairelightEvent<?>> events) {
+                               Set<SolairelightEvent<?>> events,
+                               WebClient.Builder loadBalancedWebClientBuilder) {
         this.solairelightProperties = solairelightProperties;
         this.filters = filters;
         this.events = events;
+        this.loadBalancedWebClientBuilder = loadBalancedWebClientBuilder;
     }
 
     @Override
@@ -51,6 +57,7 @@ public class SolairelightStarter implements Lifecycle, Ordered {
         SessionBroker.init(solairelightProperties);
         FilterFactory.init(this.filters);
         EventFactory.init(events);
+        ForwardWebClient.init(loadBalancedWebClientBuilder);
         //after finished
         this.running = true;
         log.info("solairelight started on path {} mode: {}", solairelightProperties.getWebsocket().getPath(),
