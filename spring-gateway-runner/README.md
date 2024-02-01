@@ -6,4 +6,4 @@
 
 ## work flow
 
-![workflow.png](workflow.png)
+![workflow.png](..%2Fworkflow.png)
