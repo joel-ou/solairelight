@@ -4,9 +4,11 @@
 
 Solairelight 是基于SpringWebFlux开发的WebSocket消息服务，支持单机以及集群部署（集群需要Redis）。
 
+<br>消息广播，WebSocket代理使用了Spring Gateway进行实现，请参考 [Gateway模块的文档](spring-gateway-runner%2FREADME.md)。
+
 ## 主要功能
 
-* **消息广播接口**：Solairelight 提供RestApi接口，用于对建立连接的会话进行消息广播。
+* **消息广播接口**：Solairelight 提供RestApi接口，用于对建立连接的会话进行消息广播（需要Gateway模块支持）。
 * **Session管理**：根据用户所属范围、特征对Session进行管理，在消息广播时可以根据以上因素进行定向广播。
 * **用户消息转发**：根据用户输入的消息、以及用户会话头信息进行路由转发（需进行二次开发，请看后续文档）。
 * **可自定义的filter、event**：支持自定义filter以及注册自己的event。filter可对消息进行处理、转化、以及剔除非法消息，filter是同步且有序的。event 可以在特定的场景触发执行，event是异步执行且无序。
