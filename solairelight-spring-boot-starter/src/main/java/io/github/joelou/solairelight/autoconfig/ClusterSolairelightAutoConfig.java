@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
@@ -38,9 +39,10 @@ public class ClusterSolairelightAutoConfig {
     public SolairelightStarter solairelightStarter(SolairelightProperties solairelightProperties,
                                                     ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate,
                                                     Set<SolairelightFilter<?>> filters,
-                                                    Set<SolairelightEvent<?>> events){
+                                                    Set<SolairelightEvent<?>> events,
+                                                    WebClient.Builder loadBalancedWebClientBuilder){
         return new ClusterSolairelightStarter(solairelightProperties, solairelightRedisTemplate,
-                filters, events);
+                filters, events, loadBalancedWebClientBuilder);
     }
 
     //functions

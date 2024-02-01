@@ -15,16 +15,21 @@ import java.time.Duration;
  * @author Joel Ou
  */
 public class ForwardWebClient {
-    private static final WebClient webClient;
+    private static WebClient webClient;
 
-    static {
+    private static WebClient.Builder loadbalancedWebClientBuilder;
+
+    public synchronized static void init(WebClient.Builder builder){
+        if(loadbalancedWebClientBuilder!=null)return;
+        ForwardWebClient.loadbalancedWebClientBuilder = builder;
+
         HttpClient httpClient = HttpClient.create()
                 .keepAlive(true)
                 .responseTimeout(Duration.ofSeconds(2))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .option(ChannelOption.MAX_MESSAGES_PER_WRITE, 1000);
+                .option(ChannelOption.MAX_MESSAGES_PER_WRITE, 10000);
         ReactorClientHttpConnector connector = new ReactorClientHttpConnector(httpClient);
-        webClient = WebClient.builder().clientConnector(connector).build();
+        webClient = loadbalancedWebClientBuilder.clientConnector(connector).build();
     }
 
     public static Mono<ResponseEntity<String>> post(URI uri, Object body, MultiValueMap<String, String> headers){

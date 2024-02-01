@@ -6,6 +6,7 @@ import io.github.joelou.solairelight.filter.SolairelightFilter;
 import io.github.joelou.solairelight.properties.SolairelightProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Set;
 
@@ -20,8 +21,9 @@ public class ClusterSolairelightStarter extends SolairelightStarter {
     public ClusterSolairelightStarter(SolairelightProperties solairelightProperties,
                                       ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate,
                                       Set<SolairelightFilter<?>> filters,
-                                      Set<SolairelightEvent<?>> events) {
-        super(solairelightProperties, filters, events);
+                                      Set<SolairelightEvent<?>> events,
+                                      WebClient.Builder loadBalancedWebClientBuilder) {
+        super(solairelightProperties, filters, events, loadBalancedWebClientBuilder);
         this.solairelightRedisTemplate = solairelightRedisTemplate;
     }
 
