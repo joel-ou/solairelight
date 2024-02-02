@@ -35,6 +35,7 @@ spring:
           predicates:
           - Path=/solairelight
 ```
-## work flow
+## Workflow
+注：看图需科学上网
 
 ![workflow.png](..%2Fworkflow.png)

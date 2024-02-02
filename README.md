@@ -231,7 +231,8 @@ solairelight:
 ```
 集群节点ID后缀可以通过添加JAVA的执行参数设置 java -Dsolairelight.cluster.nodeIdSuffix=-99 
 
-## work flow
+## Workflow
+注：看图需科学上网
 
 ![workflow.png](workflow.png)
 
