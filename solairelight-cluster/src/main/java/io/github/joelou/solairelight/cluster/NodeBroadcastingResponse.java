@@ -36,7 +36,7 @@ public class NodeBroadcastingResponse {
 
     public static NodeBroadcastingResponse success(NodeData.BasicInfo basicInfo){
         return new NodeBroadcastingResponse(basicInfo.getNodeId(),
-                true, "0","success.");
+                true, "0","success");
     }
 
     public static NodeBroadcastingResponse failure(String code, String message) {

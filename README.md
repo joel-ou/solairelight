@@ -179,7 +179,7 @@ Channel：固定为Websocket
       "nodeId": "FEFA2F9FF992-1",
       "success": true,
       "code": "0",
-      "message": "success."
+      "message": "success"
     }
   ]
 }
