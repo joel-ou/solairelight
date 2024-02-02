@@ -172,9 +172,16 @@ Channel：固定为Websocket
 响应结果结构：
 ```json
 {
-  "success": true,
-  "code": "success",
-  "message": "success"
+  "message": null,
+  "cluster": true,
+  "clusterResult": [
+    {
+      "nodeId": "FEFA2F9FF992-1",
+      "success": true,
+      "code": "0",
+      "message": "success."
+    }
+  ]
 }
 ```
 
@@ -223,7 +230,7 @@ solairelight:
     enable: true #是否开启用户消息转发
     forwardHeader: Host #转发Header，会将Session建立时的Header信息进行转发。也可以新增Header，Key=Value格式即是定义新的，如果跟已有的冲突则以新的为准。
     routes:
-      - uri: http://localhost:8081/example
+      - uri: http://localhost:8081/example #支持负载均衡，例如：http://serviceName/example
         predicate:
           message: sampleKey=='v1' #转发条件1，对消息信息匹配
           session-header: h1==v1 #转发条件2，对session头进行匹配
