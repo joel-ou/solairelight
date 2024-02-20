@@ -11,10 +11,12 @@
         <option value="$PROJECT_DIR$/spring-gateway-runner/pom.xml" />
         <option value="$PROJECT_DIR$/solairelight-spring-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/solairelight-cluster/pom.xml" />
+        <option value="$PROJECT_DIR$/downstream-test/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/solairelight-cluster/downstream-test/pom.xml" />
         <option value="$PROJECT_DIR$/solairelight-spring-gateway/pom.xml" />
       </set>
     </option>

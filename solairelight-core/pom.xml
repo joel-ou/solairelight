@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.joel-ou.solairelight</groupId>
     <artifactId>solairelight-core</artifactId>
-    <version>1.0.2-alpha</version>
+    <version>1.0.3-alpha</version>
     <name>solairelight-core</name>
     <description>a reactive WebSocket communication service based on Spring-WebFlux. 基于Spring-WebFlux开发的响应式WebSocket通讯服务。</description>
     <packaging>jar</packaging>
@@ -87,14 +87,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
             <version>${spring-boot-version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
             <version>${spring-boot-version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.github.joelou.solairelight</groupId>

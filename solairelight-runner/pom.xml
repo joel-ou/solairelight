@@ -46,6 +46,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
@@ -62,7 +67,7 @@
         <dependency>
             <groupId>io.github.joel-ou.solairelight</groupId>
             <artifactId>solairelight-spring-boot-starter</artifactId>
-            <version>1.0.2-alpha</version>
+            <version>1.0.3-alpha</version>
             <scope>compile</scope>
         </dependency>
 
