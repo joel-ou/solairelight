@@ -23,7 +23,3 @@ spring:
           uri: http://127.0.0.1:8081/session/token
           predicates:
             - Path=/session/token
-solairelight:
-  websocket:
-    routing:
-      mode: redirect
