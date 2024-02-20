@@ -53,6 +53,7 @@ public class SolairelightStarter implements Lifecycle, Ordered {
         ClusterTools.initNodeId(solairelightProperties.getCluster().getNodeIdSuffix());
         NodeData.instance.getBasicInfo().setPort(port);
         NodeData.instance.getSessionQuota().set(solairelightProperties.getSession().getMaxNumber());
+        NodeData.instance.setMaxSessionNumber(solairelightProperties.getSession().getMaxNumber());
         //init components
         SessionBroker.init(solairelightProperties);
         FilterFactory.init(this.filters);

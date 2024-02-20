@@ -29,6 +29,9 @@ public class NodeData implements Serializable{
 
     private final AtomicInteger sessionQuota = new AtomicInteger();
 
+    @Setter
+    private int maxSessionNumber = 0;
+
     private long version;
 
     public final static NodeData instance = new NodeData();
