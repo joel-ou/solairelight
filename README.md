@@ -215,7 +215,9 @@ UserRanges：用于定义Session所属的范围，例如用户所处客户端、
 #SolairelightConfig example
 solairelight:
   enable: true
-  websocket-path: /solairelight
+  websocket:
+    path: /solairelight #ws连接路径
+    domain: demo.solairelight.io #预留配置，暂时未使用。
   cluster:
     enable: true #是否启用集群
     node-id-suffix: 1 #集群节点ID后缀
