@@ -2,17 +2,14 @@ package io.github.joelou.solairelight.util;
 
 
 import lombok.Getter;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import sun.misc.Unsafe;
 
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Joel Ou
+ * this class is a thread spin-lock collection.
  */
 public class CapacityLimitLinkedList<T> {
 
@@ -31,24 +28,26 @@ public class CapacityLimitLinkedList<T> {
         this.capacity = capacity;
     }
 
-    public void add(T t) {
+    public boolean add(T t) {
+        if(contains(t))return false;
         for (; ;) {
             boolean acquired = state.compareAndSet(0, 1);
             if(!acquired) {
                 continue;
             }
             try {
+                if(contains(t))return false;
                 duration = System.currentTimeMillis();
                 holder = Thread.currentThread();
                 //check list size.
                 trySqueezeOut();
                 //add element
                 list.addFirst(t);
+                return true;
             } finally {
                 //restore state.
                 state.set(0);
             }
-            return;
         }
     }
 
@@ -64,5 +63,9 @@ public class CapacityLimitLinkedList<T> {
         if(capacity == list.size()) {
             list.removeLast();
         }
+    }
+
+    public void remove(T t){
+        list.remove(t);
     }
 }

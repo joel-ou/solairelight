@@ -52,13 +52,12 @@ public class WebSocketBroadcaster extends AbstractBroadcaster {
                 broadcastParam.getPredicate());
         if(CollectionUtils.isEmpty(sessions)) {
             log.warn("node {} no session found.", ClusterTools.getNodeId());
+            super.remove(broadcastParam.getId());
             throw new NoSessionFoundException();
         }
         for (BasicSession session : sessions) {
             //send message for client
             broadcastSender.send(session, broadcastParam.getMessage());
-            //store the broadcast id.
-            super.cache(broadcastParam.getId());
         }
         log.info("broadcast success {} matched", sessions.size());
         return Mono.just(NodeBroadcastingResponse.success(NodeData.instance.getBasicInfo()));

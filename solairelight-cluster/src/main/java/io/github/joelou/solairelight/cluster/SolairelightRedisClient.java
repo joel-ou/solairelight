@@ -162,7 +162,7 @@ public class SolairelightRedisClient {
                 nodeRegister(true);
             }
         });
-        heartbeat.setName("Solairelight-Heartbeat-Thread"+ClusterTools.getNodeId());
+        heartbeat.setName("solairelight-heartbeat-thread"+ClusterTools.getNodeId());
         heartbeat.start();
     }
 

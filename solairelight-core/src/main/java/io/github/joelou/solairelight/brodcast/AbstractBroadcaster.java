@@ -15,12 +15,15 @@ public abstract class AbstractBroadcaster implements Broadcaster {
         duplication = new CapacityLimitLinkedList<>(1000);
     }
 
-    public void cache(String id){
-        duplication.add(id);
-    }
-
 
     public boolean duplicated(String id){
-        return duplication.contains(id);
+        return !duplication.add(id);
+    }
+
+    public void remove(String id) {
+        duplication.remove(id);
+    }
+
+    public static void main(String[] args) {
     }
 }

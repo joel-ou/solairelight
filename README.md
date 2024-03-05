@@ -46,9 +46,9 @@ Solairelight 是基于SpringWebFlux开发的WebSocket消息服务，支持单机
 暂无，后续会添加。
 
 ## 自定义Filter
-因为项目是基于Spring开发的，所有实现自己的Filter也是非常的简单的。
+因为项目是基于Spring开发的，所以实现自己的Filter也是非常的简单的。
 <br>只需要实现特定的接口，然后将其注册为Spring Bean即可。
-<br>**Filter 是同步的，请勿在Filter执行IO操作或者阻塞线程的操作，如需此类操作请使用Event。**
+<br>**Filter 是同步的，请勿在Filter内执行IO操作或者阻塞线程的操作，如需此类操作请使用Event。**
 <br>目前提供了两种Filter：
 * **MessageFilter**：应用于消息阶段，分类三种类型 none（默认，应用所有消息类型）, incoming（入站消息、例如：用户消息）, broadcast（广播消息）; 
 <br>要自定义该类型Filter，非常简单，只需继承MessageFilter，同时设置MessageWay（上述三种之一）即可。
