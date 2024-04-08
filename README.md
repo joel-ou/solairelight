@@ -155,7 +155,7 @@ public class MessageFeatureFilter extends MessageFilter {
     "channel":"Websocket",
     "range": "node==1,node==2,node==3",
     "predicate": "isVip==true or isVip==false",
-    "message": "dGhpcyBpcyBhIG1lc3NhZ2UgZm9yIGJheWVz",
+    "message": "base64:dGhpcyBpcyBhIG1lc3NhZ2UgZm9yIGJheWVz",
     "id": 100
 }
 ```
@@ -188,7 +188,7 @@ Channel：固定为Websocket
 * 默认的连接路径是/solairelight，例如：ws://127.0.0.1:8081/solairelight
 * Web端因为无法支持自定义的Header，可将自定义的Header信息通过URL参数传入。
 * 所有的Session建立连接时候都需要携带一个Token（JWT）Header，用于标识该Session所属范围，以及用户特征。
-* 该Token的KEY为Metadata-Token，KEY Name可自定义。
+* 该Token的KEY名称为Metadata-Token，KEY名称可自定义（见配置章节）。
 <br>例如：Metadata-Token = eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMiwidXNlclJhbmdlcyI6eyJub2RlIjoxLCJyb29tIjo5OX0sInVzZXJGZWF0dXJlcyI6eyJsZXZlbCI6MTAsImlzVmlwIjpmYWxzZSwibmFtZSI6ImphY2sifX0.a-Nt-O2L_FGNA2LMDmNS05wrlzbsSfX76hSFwKdT9OFSgJ4g8iaMFQB_Br6oSEcAf6whxAt2kOUQFozNIjdzwA
 
 <br>Token格式如下：
