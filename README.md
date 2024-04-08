@@ -91,11 +91,10 @@ public class SessionFilterImpl implements SessionFilter {
 目前提供五种事件：Message消息入站事件、Broadcast广播事件、SessionConnected会话连接、SessionDisconnected会话断开连接、Global全局事件。
 <br>所有种类的事件都是异步执行的，可以操作IO（尽量使用非阻塞）、阻塞线程（不建议，尽量减少阻塞时长）。
 <br>事件是无序的，无法保证同种类的事件执行顺序，内部使用了较少的线程（cores*2），建议耗时操作使用Reactor以及类似的响应式类库。
-* **Message**：实现MessageEvent接口，并将其注册为SpringBean。
-* **Broadcast**：实现SessionConnectedEvent接口，并将其注册为SpringBean。
-* **SessionConnected**：实现SessionDisconnectedEvent接口，并将其注册为SpringBean。
-* **SessionDisconnected**：实现MessageEvent接口，并将其注册为SpringBean。
-* **Global**：实现GlobalEvent接口，并将其注册为SpringBean。Global事件可以通过EventContext得知由何种事件触发。
+* **Message**：有入站消息进入时会触发，处理入站消息，实现MessageEvent接口并将其注册为Spring Bean即可。
+* **SessionConnected**：session连接成功时触发，实现SessionConnectedEvent接口并将其注册为Spring Bean即可。
+* **SessionDisconnected**：session断开时触发，实现SessionDisconnectedEvent接口并将其注册为Spring Bean即可。
+* **Global**：实现GlobalEvent接口，并将其注册为Spring Bean。Global事件可以通过EventContext得知由何种事件触发。
 ```java
 @Component
 public class MessageEventImpl implements MessageEvent {
