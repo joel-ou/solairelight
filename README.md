@@ -8,7 +8,7 @@ Solairelight 是基于SpringWebFlux开发的WebSocket消息服务，支持单机
 
 ## 主要功能
 
-* **消息广播接口**：Solairelight 提供RestApi接口，用于对建立连接的会话进行消息广播（需要Gateway模块支持）。
+* **消息广播接口**：Solairelight 提供REST API接口，用于对建立连接的会话进行消息广播（需要Gateway模块支持）。
 * **Session管理**：根据用户所属范围、特征对Session进行管理，在消息广播时可以根据以上因素进行定向广播。
 * **用户消息转发**：根据用户输入的消息、以及用户会话头信息进行路由转发（需进行二次开发，请看后续文档）。
 * **可自定义的filter、event**：支持自定义filter以及注册自己的event。filter可对消息进行处理、转化、以及剔除非法消息，filter是同步且有序的。event 可以在特定的场景触发执行，event是异步执行且无序。
@@ -147,7 +147,7 @@ public class MessageFeatureFilter extends MessageFilter {
 <br>你也可以将转发模块关掉，通过注册事件实现自己的转发功能，方法见文档的 “配置” 部分。
 
 ## 消息广播
-消息广播可通过调用RestApi对区域内满足特定条件的用户进行广播，也可以全局广播。
+消息广播可通过调用REST API对区域内满足特定条件的用户进行广播，也可以全局广播。
 消息广播有固定的格式，目前只支持JSON。
 <br>**消息格式如下**：
 ```json
@@ -166,7 +166,7 @@ Channel：固定为Websocket
 <br>ID：该次广播的唯一ID，不可重复，重复的ID不会进行广播操作。
 <br>
 <br>
-**RestApi地址：post host:port/solairelight/broadcast**
+**REST API地址：post host:port/solairelight/broadcast**
 <br>
 响应结果结构：
 ```json
