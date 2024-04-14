@@ -136,10 +136,10 @@ public class SolairelightRedisClient {
         return hashOperations.get(ID_STORAGE_REDIS_KEY, id).map(obj->(NodeData.BasicInfo) obj);
     }
 
-    public void pushId(String... id){
-        Map<String, NodeData.BasicInfo> ids = new LinkedHashMap<>(id.length);
-        for (String key : id) {
-            ids.put(key, NODE_INFO);
+    public void pushId(String... idParams){
+        Map<String, String> ids = new LinkedHashMap<>(idParams.length);
+        for (String id : idParams) {
+            ids.put(id, NODE_INFO.getNodeId());
         }
         hashOperations.putAll(ID_STORAGE_REDIS_KEY, ids).subscribe();
     }

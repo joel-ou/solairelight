@@ -7,6 +7,8 @@ import lombok.Data;
  */
 @Data
 public class SessionProperties {
+
     private int idle = 600;
+
     private int maxNumber = 0;
 }

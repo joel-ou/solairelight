@@ -40,7 +40,7 @@ public class EventContext<T> {
         return this;
     }
 
-    public EventContext<T> setArgument(T argument) {
+    EventContext<T> setArgument(T argument) {
         this.argument = argument;
         return this;
     }

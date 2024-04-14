@@ -1,7 +1,9 @@
 package io.github.joelou.solairelight.event;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 
 /**
  * @author Joel Ou
@@ -22,7 +24,7 @@ public class EventThreadPool {
         forkJoinPool.execute(runnable);
     }
 
-    public static Future<?> invokeAll(Callable<?> callable){
+    public static Future<?> invoke(Callable<?> callable){
         return forkJoinPool.submit(callable);
     }
 
