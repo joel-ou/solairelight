@@ -22,17 +22,18 @@ public class UniqueIndexEvent implements GlobalEvent {
     public void execute(EventContext<Object> context) {
         SolairelightRedisClient solairelightRedisClient = SolairelightRedisClient.getInstance();
         BasicSession basicSession;
-        switch (context.getEventType()) {
+        switch (context.getTrigger()) {
             case SESSION_CONNECTED:
-                basicSession = toSession(context.getArgument());
-                String[] ids = keys(basicSession.getUserMetadata().getUserFeatures()).map(Map.Entry::getValue).toArray(String[]::new);
-                solairelightRedisClient.pushId(ids);
-                break;
-            case SESSION_DISCONNECTED:
                 basicSession = toSession(context.getArgument());
                 Object id = basicSession.getUserMetadata().getUserFeatures().get("id");
                 if(id != null)
-                    solairelightRedisClient.removeId(id);
+                    solairelightRedisClient.pushId(id.toString());
+                break;
+            case SESSION_DISCONNECTED:
+                basicSession = toSession(context.getArgument());
+                Object removeId = basicSession.getUserMetadata().getUserFeatures().get("id");
+                if(removeId != null)
+                    solairelightRedisClient.removeId(removeId.toString());
                 break;
             default:
                 break;
