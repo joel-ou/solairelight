@@ -24,7 +24,7 @@ public class CaffeineSessionStorage implements SessionStorage {
     public CaffeineSessionStorage(SolairelightProperties solairelightProperties){
         int idleTime = solairelightProperties.getSession().getIdle();
         sessionCaffeine = Caffeine.newBuilder()
-                .maximumSize(solairelightProperties.getSession().getMaxNumber())
+                .maximumSize(solairelightProperties.getSession().getMaxNumber()*2L)
                 .expireAfterAccess(Duration.ofSeconds(idleTime))
                 .scheduler(Scheduler.forScheduledExecutorService(Executors.newSingleThreadScheduledExecutor()))
                 .removalListener(new SessionRemovalCallback())
