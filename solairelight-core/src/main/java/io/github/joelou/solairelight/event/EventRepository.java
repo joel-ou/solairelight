@@ -20,8 +20,8 @@ public class EventRepository {
     }
 
     public static Set<SolairelightEvent<?>> getEvents(EventTrigger.TriggerAction triggerAction){
-        Set<SolairelightEvent<?>> specificEvents = events.getOrDefault(EventContext.EventType.GLOBAL,
-                new HashSet<>());
+        Set<SolairelightEvent<?>> specificEvents = new HashSet<>(events.getOrDefault(EventContext.EventType.GLOBAL,
+                new HashSet<>()));
         switch (triggerAction) {
             case SESSION_CONNECTED:
                 padding(specificEvents, EventContext.EventType.SESSION_CONNECTED);

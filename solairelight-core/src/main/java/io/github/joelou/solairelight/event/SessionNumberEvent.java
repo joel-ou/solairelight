@@ -6,6 +6,7 @@ import io.github.joelou.solairelight.session.BasicSession;
 /**
  * @author Joel Ou
  */
+@Deprecated
 public class SessionNumberEvent implements SessionConnectedEvent, SessionDisconnectedEvent {
 
     @Override
