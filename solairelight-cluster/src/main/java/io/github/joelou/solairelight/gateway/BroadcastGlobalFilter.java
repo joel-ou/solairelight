@@ -3,9 +3,11 @@ package io.github.joelou.solairelight.gateway;
 import io.github.joelou.solairelight.cluster.BroadcastDistributor;
 import io.github.joelou.solairelight.cluster.NodeBroadcastingResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.support.BodyInserterContext;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -13,6 +15,9 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Resource;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.*;
 
@@ -23,6 +28,8 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.*
 public class BroadcastGlobalFilter implements GlobalFilter {
     @Resource
     private BroadcastDistributor broadcastDistributor;
+
+    private final static Pattern pattern = Pattern.compile("id={2}((\\d+|-?\\d+.\\d+)+|'\\w+')");
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -42,7 +49,16 @@ public class BroadcastGlobalFilter implements GlobalFilter {
                 //do broadcast.
                 .flatMap(message-> {
                     String json = message.toString(StandardCharsets.UTF_8);
-                    return broadcastDistributor.distributeAllNode(json);
+                    Map<String, Object> jsonMap = JsonParserFactory.getJsonParser().parseMap(json);
+                    String idEl = extractIdEl(jsonMap.getOrDefault("predicate", "").toString());
+                    if(idEl != null){
+                        String val = idEl.split("==")[1];
+                        if(val.contains("'"))
+                            val = val.replace("'", "");
+                        return broadcastDistributor.distributeSpecified(json, val);
+                    } else {
+                        return broadcastDistributor.distributeAllNode(json);
+                    }
                 })
                 .doOnNext(response::add)
                 .last(new NodeBroadcastingResponse())
@@ -55,5 +71,14 @@ public class BroadcastGlobalFilter implements GlobalFilter {
                             .insert(exchange.getResponse(), new BodyInserterContext());
                 })
                 .then(chain.filter(exchange));
+    }
+
+    private String extractIdEl(@Nullable String predicate){
+        if(predicate == null || predicate.isEmpty()) return null;
+        if(predicate.contains("id")){
+            Matcher matcher = pattern.matcher(predicate);
+            return matcher.find()?matcher.group():null;
+        }
+        return null;
     }
 }

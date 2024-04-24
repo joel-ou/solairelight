@@ -132,10 +132,6 @@ public class SolairelightRedisClient {
                 });
     }
 
-    public Mono<NodeData.BasicInfo> getNodesById(String id){
-        return hashOperations.get(ID_STORAGE_REDIS_KEY, id).map(obj->(NodeData.BasicInfo) obj);
-    }
-
     public void pushId(String... idParams){
         Map<String, String> ids = new LinkedHashMap<>(idParams.length);
         for (String id : idParams) {
@@ -146,6 +142,10 @@ public class SolairelightRedisClient {
 
     public void removeId(Object... id){
         hashOperations.remove(ID_STORAGE_REDIS_KEY, id).subscribe();
+    }
+
+    public Mono<String> getNodeById(Object id){
+        return hashOperations.get(ID_STORAGE_REDIS_KEY, id.toString()).cast(String.class);
     }
 
     public void heartbeat(){

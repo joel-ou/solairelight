@@ -1,17 +1,14 @@
 package io.github.joelou.solairelight.cluster;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
 
-import javax.annotation.Resource;
 import java.net.ConnectException;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Joel Ou
@@ -19,22 +16,38 @@ import java.time.Duration;
 @Slf4j
 @Service
 public class RestBroadcastDistributor implements BroadcastDistributor {
-    private final Scheduler scheduler = Schedulers.boundedElastic();
-
-    @Resource
-    private ReactiveRedisTemplate<Object, Object> solairelightRedisTemplate;
 
     @Override
     public Flux<NodeBroadcastingResponse> distributeSpecified(Object broadcastParam,
-                                                              NodeData.BasicInfo basicInfo) {
-        return post(broadcastParam, basicInfo).flux();
+                                                              String id) {
+        SolairelightRedisClient redisClient = SolairelightRedisClient.getInstance();
+        AtomicReference<NodeData> jumping = new AtomicReference<>();
+        return redisClient
+                .getNodeById(id)
+                .flatMap(nodeId-> redisClient.getNodes().filter(n->n.getBasicInfo().getNodeId().equals(nodeId)).last())
+                .flatMap(node-> {
+                    jumping.set(node);
+                    return post(broadcastParam, node.getBasicInfo());
+                })
+                .flatMapMany(r->{
+                    Flux<NodeBroadcastingResponse> responseFlux = Flux.just(r);
+                    if(!r.isSuccess()){
+                        return responseFlux.concatWith(distributeAllNode(broadcastParam, jumping.get()));
+                    }
+                    return responseFlux;
+                });
     }
 
     @Override
     public Flux<NodeBroadcastingResponse> distributeAllNode(Object broadcastParam) {
+        return distributeAllNode(broadcastParam, null);
+    }
+
+    private Flux<NodeBroadcastingResponse> distributeAllNode(Object broadcastParam, NodeData jumping) {
         return SolairelightRedisClient
                 .getInstance()
                 .getNodeCacheFlux()
+                .filter(nodeData -> !nodeData.equals(jumping))
                 .flatMap(nodeData -> post(broadcastParam, nodeData.getBasicInfo()));
     }
 
